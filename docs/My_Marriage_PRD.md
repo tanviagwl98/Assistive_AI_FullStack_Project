@@ -263,12 +263,12 @@ This module is intended to provide a lightweight incident-management layer for r
 - Settings
 - Wedding Day Mode
 # 10. Recommended Technology Stack
-- Frontend: Next.js, React, TypeScript, Tailwind CSS
+- Frontend: Next.js, React, TypeScript, Tailwind CSS, Vite
 - Forms and validation: React Hook Form and Zod
 - Server state: TanStack Query
 - Client/UI state: Zustand where required
 - Backend: Node.js and Express
-- Database: PostgreSQL
+- Database: MongoDb+Mongoose
 - File storage: Object storage for photos, documents, and receipts
 - Authentication: Secure session/token-based authentication
 - CI/CD: GitHub Actions
