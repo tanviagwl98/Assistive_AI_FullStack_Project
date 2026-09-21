@@ -5,7 +5,7 @@
 **Architecture:** Modular Monolith  
 **Frontend:** Next.js / React / TypeScript  
 **Backend:** Node.js / Express.js  
-**Database:** PostgreSQL  
+**Database:** MongoDB  
 **ORM:** Prisma  
 **Storage:** S3-compatible Object Storage  
 **API Style:** REST  
