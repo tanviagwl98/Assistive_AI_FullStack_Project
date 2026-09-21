@@ -1,15 +1,16 @@
 # MY MARRIAGE
+
 ## System Design & Architecture Document
 
-**Product:** My Marriage  
-**Architecture:** Modular Monolith  
-**Frontend:** Next.js / React / TypeScript  
-**Backend:** Node.js / Express.js  
-**Database:** MongoDB  
-**ODM:** Mongoose  
-**Storage:** S3-compatible Object Storage  
-**API Style:** REST  
-**Deployment:** Docker + GitHub Actions  
+**Product:** My Marriage
+**Architecture:** Modular Monolith
+**Frontend:** Next.js / React / TypeScript
+**Backend:** Node.js / Express.js / TypeScript
+**Database:** MongoDB
+**ODM:** Mongoose
+**Storage:** S3-compatible Object Storage
+**API Style:** REST
+**Deployment:** Docker + GitHub Actions
 
 ---
 
@@ -17,7 +18,11 @@
 
 My Marriage is designed as a **modular monolith**: one deployable backend application containing clearly separated business modules.
 
-The architecture is intentionally not microservices-first. The product has many strongly connected domains such as weddings, events, guests, invitations, RSVPs, vendors, expenses, accommodation, transportation, documents, and wedding-day execution. Keeping these domains inside one application simplifies transactions, development, testing, deployment, and local development while preserving clear module boundaries for future extraction if scale requires it.
+The architecture is intentionally not microservices-first. The product has many strongly connected domains such as weddings, events, guests, invitations, RSVPs, vendors, expenses, accommodation, transportation, documents, and wedding-day execution.
+
+Keeping these domains inside one application simplifies development, testing, deployment, local development, and operational complexity while preserving clear module boundaries for future extraction if scale requires it.
+
+MongoDB is used as the primary database because the application contains a combination of structured relationships, flexible wedding-specific data, event configurations, guest information, media metadata, and evolving feature requirements. Mongoose provides schema definitions, validation, middleware, indexes, references, and a structured data-access layer on top of MongoDB.
 
 ## High-Level Architecture
 
@@ -85,8 +90,9 @@ The architecture is intentionally not microservices-first. The product has many 
                     │                    │                    │
                     ▼                    ▼                    ▼
              ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
-             │ PostgreSQL   │     │ Object       │     │ Redis        │
-             │ + Prisma     │     │ Storage      │     │ Optional/MVP │
+             │   MongoDB    │     │ Object       │     │ Redis        │
+             │ Atlas / DB   │     │ Storage      │     │ Optional     │
+             │ + Mongoose   │     │ S3-compatible│    │              │
              └──────────────┘     └──────────────┘     └──────┬───────┘
                                                                │
                                                                ▼
@@ -107,14 +113,14 @@ The architecture is intentionally not microservices-first. The product has many 
 
 ## 2.1 Modular Monolith
 
-The backend is one application but is divided into business modules. Modules communicate through application services and domain events rather than directly accessing another module's internal implementation.
+The backend is one application but is divided into business modules.
 
 ```text
 modules/
 ├── auth/
 ├── wedding/
-├── events/
 ├── members/
+├── events/
 ├── guests/
 ├── tasks/
 ├── vendors/
@@ -131,6 +137,10 @@ modules/
 ├── issues/
 └── analytics/
 ```
+
+Modules communicate through application services and internal domain events rather than directly accessing another module's internal implementation.
+
+---
 
 ## 2.2 Wedding as the Tenant Boundary
 
@@ -152,7 +162,11 @@ User
         └── Expenses
 ```
 
-Every tenant-owned query must be scoped by `wedding_id` or derive the wedding context through an authorized relationship.
+Every wedding-owned MongoDB document should contain a `weddingId` wherever practical.
+
+This makes tenant isolation explicit at the data-access layer.
+
+---
 
 ## 2.3 Event as a Secondary Access Boundary
 
@@ -181,9 +195,15 @@ Guest A
 
 This relationship must be enforced at the backend authorization layer, not only in the frontend.
 
+---
+
 ## 2.4 Backend as the Source of Truth
 
-Frontend permission checks improve UX but do not provide security. Every protected operation must be authorized by the backend.
+Frontend permission checks improve UX but do not provide security.
+
+Every protected operation must be authorized by the backend.
+
+---
 
 ## 2.5 Reuse Data Across Features
 
@@ -205,7 +225,66 @@ This avoids duplicate data entry.
 
 ---
 
-# 3. C4-Style System Context
+# 3. MongoDB Data Modeling Strategy
+
+My Marriage uses a **hybrid MongoDB data-modeling strategy**.
+
+The application should not attempt to put the entire wedding into one MongoDB document.
+
+Instead:
+
+### Embed
+
+Embed small, tightly coupled data that is normally retrieved together.
+
+Examples:
+
+```text
+Wedding
+ ├── privacySettings
+ ├── notificationSettings
+ ├── websiteSettings
+ └── primaryAddress
+```
+
+### Reference
+
+Reference entities that:
+
+* Grow independently.
+* Are frequently updated.
+* Are shared across multiple features.
+* Can become large.
+* Need independent querying.
+
+Examples:
+
+```text
+Wedding
+ ├── Events
+ ├── Guests
+ ├── Vendors
+ ├── Tasks
+ ├── Expenses
+ ├── Documents
+ └── Photos
+```
+
+### Core principle
+
+```text
+Small + tightly coupled
+        ↓
+     Embed
+
+Large + independent
+        ↓
+    Reference
+```
+
+---
+
+# 4. C4-Style System Context
 
 ```text
                          ┌───────────────────────────┐
@@ -242,13 +321,13 @@ My Marriage
     ├── Optional WhatsApp Provider
     ├── Maps Provider
     ├── External Live Streaming Provider
-    ├── Object Storage
-    └── Optional OAuth Provider (Google)
+    ├── S3-compatible Object Storage
+    └── Optional OAuth Provider
 ```
 
 ---
 
-# 4. Application Layer Architecture
+# 5. Application Layer Architecture
 
 The backend should follow a layered structure inside every module.
 
@@ -269,7 +348,7 @@ HTTP Request
 └───────┬───────┘
         ▼
 ┌───────────────┐
-│ Application    │  Use cases
+│ Application   │  Use cases
 │ Service       │
 └───────┬───────┘
         ▼
@@ -282,11 +361,12 @@ HTTP Request
 └───────┬───────┘
         ▼
 ┌───────────────┐
-│ Prisma ORM    │
+│ Mongoose      │
+│ Models        │
 └───────┬───────┘
         ▼
 ┌───────────────┐
-│ PostgreSQL    │
+│ MongoDB       │
 └───────────────┘
 ```
 
@@ -294,44 +374,48 @@ External services should be accessed through adapters/interfaces rather than bei
 
 ---
 
-# 5. Backend Module Boundaries
+# 6. Backend Module Boundaries
 
-## 5.1 Auth Module
-
-Responsibilities:
-
-- Registration
-- Login
-- Logout
-- Password reset
-- Session/token management
-- Optional Google OAuth
-- User profile
-
-Does not own wedding permissions. Wedding membership and resource authorization belong to the membership/authorization layer.
-
-## 5.2 Wedding Module
+## 6.1 Auth Module
 
 Responsibilities:
 
-- Create wedding
-- Update wedding information
-- Wedding settings
-- Wedding privacy
-- Wedding lifecycle
-- Budget configuration
+* Registration
+* Login
+* Logout
+* Password reset
+* Session/token management
+* Optional Google OAuth
+* User profile
 
-Owns the root `Wedding` entity.
+Wedding permissions are handled by the members/authorization layer.
 
-## 5.3 Members & Authorization Module
+---
+
+## 6.2 Wedding Module
 
 Responsibilities:
 
-- Add/remove wedding members
-- Assign roles
-- Permission management
-- Wedding-level authorization
-- Event-level authorization helpers
+* Create wedding
+* Update wedding information
+* Wedding settings
+* Wedding privacy
+* Wedding lifecycle
+* Budget configuration
+
+Owns the root `Wedding` document.
+
+---
+
+## 6.3 Members & Authorization Module
+
+Responsibilities:
+
+* Add/remove wedding members
+* Assign roles
+* Permission management
+* Wedding-level authorization
+* Event-level authorization helpers
 
 Example roles:
 
@@ -344,210 +428,299 @@ VENDOR
 GUEST
 ```
 
-## 5.4 Events Module
+---
+
+## 6.4 Events Module
 
 Responsibilities:
 
-- Create/update/delete/archive events
-- Event scheduling
-- Event venue
-- Event metadata
-- Event ordering
-- Event calendar/timeline
+* Create/update/archive events
+* Event scheduling
+* Event venue
+* Event metadata
+* Event ordering
+* Event calendar/timeline
 
-## 5.5 Guests Module
+---
 
-Responsibilities:
-
-- Guest directory
-- Contact information
-- Household/family grouping
-- Guest notes
-- Plus-one information
-- Guest status
-
-## 5.6 EventGuest Module
+## 6.5 Guests Module
 
 Responsibilities:
 
-- Event invitation assignment
-- Event-level authorization
-- Event RSVP relationship
-- Event check-in relationship
-- Event invitation state
+* Guest directory
+* Contact information
+* Household/family grouping
+* Guest notes
+* Plus-one information
+* Guest status
+
+---
+
+## 6.6 EventGuest Module
+
+Responsibilities:
+
+* Event invitation assignment
+* Event-level authorization
+* Event RSVP relationship
+* Event check-in relationship
+* Event invitation state
 
 This is a critical module.
 
-## 5.7 Tasks Module
+---
+
+## 6.7 Tasks Module
 
 Responsibilities:
 
-- Tasks
-- Assignment
-- Priority
-- Due dates
-- Kanban state
-- Attachments
-- Task reminders
+* Tasks
+* Assignment
+* Priority
+* Due dates
+* Kanban state
+* Attachments
+* Task reminders
 
-## 5.8 Vendors Module
+---
 
-Responsibilities:
-
-- Vendor profiles
-- Event-vendor relationships
-- Contracts
-- Quoted/agreed amounts
-- Vendor payments
-- Vendor notes
-
-## 5.9 Expenses Module
+## 6.8 Vendors Module
 
 Responsibilities:
 
-- Budget
-- Expenses
-- Categories
-- Payments
-- Receipts
-- Pending amounts
-- Budget calculations
+* Vendor profiles
+* Event-vendor relationships
+* Contracts
+* Quoted/agreed amounts
+* Vendor payments
+* Vendor notes
 
-## 5.10 Invitations Module
+---
 
-Responsibilities:
-
-- Invitation templates
-- Invitation generation
-- Unique links
-- Invitation delivery status
-- Invitation/event mapping
-
-## 5.11 RSVP Module
+## 6.9 Expenses Module
 
 Responsibilities:
 
-- Event-specific RSVP
-- Attendee count
-- Meal preferences
-- Accommodation requirement
-- Transport requirement
-- RSVP statistics
+* Budget
+* Expenses
+* Categories
+* Payments
+* Receipts
+* Pending amounts
+* Budget calculations
 
-## 5.12 Accommodation Module
+---
 
-Responsibilities:
-
-- Hotels
-- Rooms
-- Guest assignments
-- Check-in/out
-- Accommodation payments
-
-## 5.13 Transport Module
+## 6.10 Invitations Module
 
 Responsibilities:
 
-- Vehicles
-- Drivers
-- Pickup points
-- Drop points
-- Schedules
-- Guest assignments
+* Invitation templates
+* Invitation generation
+* Unique links
+* Invitation delivery status
+* Invitation/event mapping
 
-## 5.14 Documents Module
+---
 
-Responsibilities:
-
-- Contracts
-- Receipts
-- Invoices
-- Marriage-related documents
-- Travel/accommodation documents
-- Registration checklist
-- Role-based access
-
-## 5.15 Website Module
+## 6.11 RSVP Module
 
 Responsibilities:
 
-- Wedding website configuration
-- Public/private settings
-- Published content
-- Theme/template configuration
-- Data projection from wedding/event records
+* Event-specific RSVP
+* Attendee count
+* Meal preferences
+* Accommodation requirement
+* Transport requirement
+* RSVP statistics
 
-## 5.16 Notifications Module
+---
 
-Responsibilities:
-
-- Notification preferences
-- Notification templates
-- In-app notifications
-- Email notifications
-- Future SMS/WhatsApp adapters
-- Reminder scheduling
-
-## 5.17 Wedding Day Module
+## 6.12 Accommodation Module
 
 Responsibilities:
 
-- Current event
-- Event timeline
-- Critical tasks
-- Vendor contacts
-- Emergency contacts
-- Wedding-day operational dashboard
+* Hotels
+* Rooms
+* Guest assignments
+* Check-in/out
+* Accommodation payments
 
-## 5.18 Check-In Module
+---
 
-Responsibilities:
-
-- QR validation
-- Event access validation
-- Guest check-in
-- Check-in timestamps
-- Event attendance metrics
-
-## 5.19 Memories Module
+## 6.13 Transport Module
 
 Responsibilities:
 
-- Albums
-- Photos
-- Guest uploads
-- Moderation
-- Event tagging
-- Download/share permissions
+* Vehicles
+* Drivers
+* Pickup points
+* Drop points
+* Schedules
+* Guest assignments
 
-## 5.20 Issues Module
+---
 
-Responsibilities:
-
-- Wedding-day issues
-- Priority
-- Assignment
-- Status
-- Attachments
-- Resolution tracking
-
-## 5.21 Analytics Module
+## 6.14 Documents Module
 
 Responsibilities:
 
-- Wedding metrics
-- RSVP metrics
-- Guest check-in metrics
-- Task completion
-- Expense summary
-- Vendor summary
-- Accommodation/transport summary
+* Contracts
+* Receipts
+* Invoices
+* Marriage-related documents
+* Travel/accommodation documents
+* Registration checklist
+* Role-based access
+
+---
+
+## 6.15 Website Module
+
+Responsibilities:
+
+* Wedding website configuration
+* Public/private settings
+* Published content
+* Theme/template configuration
+* Data projection from wedding/event documents
+
+---
+
+## 6.16 Notifications Module
+
+Responsibilities:
+
+* Notification preferences
+* Notification templates
+* In-app notifications
+* Email notifications
+* Future SMS/WhatsApp adapters
+* Reminder scheduling
+
+---
+
+## 6.17 Wedding Day Module
+
+Responsibilities:
+
+* Current event
+* Event timeline
+* Critical tasks
+* Vendor contacts
+* Emergency contacts
+* Wedding-day operational dashboard
+
+---
+
+## 6.18 Check-In Module
+
+Responsibilities:
+
+* QR validation
+* Event access validation
+* Guest check-in
+* Check-in timestamps
+* Event attendance metrics
+
+---
+
+## 6.19 Memories Module
+
+Responsibilities:
+
+* Albums
+* Photos
+* Guest uploads
+* Moderation
+* Event tagging
+* Download/share permissions
+
+---
+
+## 6.20 Issues Module
+
+Responsibilities:
+
+* Wedding-day issues
+* Priority
+* Assignment
+* Status
+* Attachments
+* Resolution tracking
+
+---
+
+## 6.21 Analytics Module
+
+Responsibilities:
+
+* Wedding metrics
+* RSVP metrics
+* Guest check-in metrics
+* Task completion
+* Expense summary
+* Vendor summary
+* Accommodation/transport summary
 
 Analytics should primarily read data from other modules rather than owning operational data.
 
 ---
 
-# 6. Domain Relationship Model
+# 7. MongoDB Collection Architecture
+
+Core collections:
+
+```text
+users
+weddings
+weddingMembers
+roles
+permissions
+
+events
+guests
+eventGuests
+
+tasks
+vendors
+eventVendors
+
+expenses
+payments
+
+invitations
+rsvps
+reminders
+notifications
+
+venues
+accommodations
+rooms
+roomAssignments
+
+transports
+vehicles
+drivers
+transportAssignments
+
+documents
+
+websites
+albums
+photos
+liveStreams
+issues
+
+auditLogs
+checkIns
+```
+
+MongoDB uses collections rather than relational tables.
+
+---
+
+# 8. Core Domain Relationship Model
 
 ```text
 User
@@ -567,8 +740,6 @@ User
  │                                                   ├──< Expense
  │                                                   │
  │                                                   ├──< Invitation
- │                                                   │      │
- │                                                   │      └── Guest
  │                                                   │
  │                                                   ├──< Website
  │                                                   │
@@ -582,402 +753,729 @@ User
  │                                                   │
  │                                                   ├──< Transport
  │                                                   │
+ │                                                   ├──< CheckIn
+ │                                                   │
  │                                                   └──< Issue
 ```
 
+These are logical relationships. MongoDB stores the entities in separate collections where independent querying and growth justify references.
+
 ---
 
-# 7. Core Database Design
+# 9. Core MongoDB Schemas
 
-PostgreSQL is the primary database because the product has highly relational data and requires strong consistency between entities.
+## 9.1 User
 
-## Core Tables
+```typescript
+{
+  _id: ObjectId,
+  name: string,
+  email: string,
+  phone?: string,
+  passwordHash: string,
+  profileImageUrl?: string,
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Indexes:
+
+```text
+email: unique
+```
+
+---
+
+## 9.2 Wedding
+
+```typescript
+{
+  _id: ObjectId,
+
+  ownerId: ObjectId,
+
+  name: string,
+
+  couple: {
+    name1: string,
+    name2: string
+  },
+
+  weddingDate?: Date,
+
+  location?: {
+    city?: string,
+    state?: string,
+    country?: string,
+    address?: string,
+    latitude?: number,
+    longitude?: number
+  },
+
+  budget?: {
+    total: number,
+    currency: string
+  },
+
+  privacy: {
+    isPublic: boolean
+  },
+
+  settings: {
+    timezone: string,
+    defaultReminderSchedule?: number[]
+  },
+
+  websiteSettings?: {
+    slug?: string,
+    published: boolean,
+    theme?: string
+  },
+
+  status: "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+---
+
+# 10. Wedding Member Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+  userId: ObjectId,
+
+  roleId: ObjectId,
+
+  permissions?: string[],
+
+  status: "INVITED" | "ACTIVE" | "SUSPENDED",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Unique index:
+
+```text
+{ weddingId: 1, userId: 1 }
+```
+
+---
+
+# 11. Event Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  name: string,
+  description?: string,
+
+  date: Date,
+
+  startTime?: string,
+  endTime?: string,
+
+  venueId?: ObjectId,
+
+  venue?: {
+    name?: string,
+    address?: string,
+    mapUrl?: string
+  },
+
+  dressCode?: string,
+  notes?: string,
+
+  sortOrder: number,
+
+  status: "DRAFT" | "ACTIVE" | "COMPLETED" | "ARCHIVED",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Indexes:
+
+```text
+{ weddingId: 1, date: 1 }
+{ weddingId: 1, sortOrder: 1 }
+```
+
+---
+
+# 12. Guest Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  householdId?: ObjectId,
+
+  name: string,
+  email?: string,
+  phone?: string,
+
+  relationship?: string,
+
+  address?: {
+    line1?: string,
+    line2?: string,
+    city?: string,
+    state?: string,
+    postalCode?: string,
+    country?: string
+  },
+
+  plusOneAllowed: boolean,
+
+  notes?: string,
+
+  status: "ACTIVE" | "ARCHIVED",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Indexes:
+
+```text
+{ weddingId: 1, name: 1 }
+{ weddingId: 1, phone: 1 }
+{ weddingId: 1, email: 1 }
+```
+
+---
+
+# 13. EventGuest Schema
+
+This is one of the most important MongoDB collections.
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+  eventId: ObjectId,
+  guestId: ObjectId,
+
+  invitationStatus:
+    "NOT_SENT" |
+    "SENT" |
+    "OPENED" |
+    "RESPONDED",
+
+  rsvpStatus:
+    "PENDING" |
+    "ACCEPTED" |
+    "DECLINED",
+
+  attendeeCount: number,
+
+  accommodationRequired: boolean,
+  transportRequired: boolean,
+
+  checkInStatus:
+    "NOT_CHECKED_IN" |
+    "CHECKED_IN",
+
+  checkInAt?: Date,
+
+  notes?: string,
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Unique index:
+
+```text
+{ eventId: 1, guestId: 1 }
+```
+
+Additional index:
+
+```text
+{ weddingId: 1, eventId: 1 }
+```
+
+---
+
+# 14. Task Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+  eventId?: ObjectId,
+
+  title: string,
+  description?: string,
+
+  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT",
+
+  status:
+    "TODO" |
+    "IN_PROGRESS" |
+    "BLOCKED" |
+    "COMPLETED",
+
+  assigneeIds: ObjectId[],
+
+  dueDate?: Date,
+
+  attachments?: [
+    {
+      storageKey: string,
+      fileName: string
+    }
+  ],
+
+  createdBy: ObjectId,
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Indexes:
+
+```text
+{ weddingId: 1, status: 1 }
+{ weddingId: 1, dueDate: 1 }
+{ weddingId: 1, eventId: 1 }
+```
+
+---
+
+# 15. Vendor Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  name: string,
+  category: string,
+
+  contact?: {
+    phone?: string,
+    email?: string,
+    address?: string
+  },
+
+  financials?: {
+    quotedAmount?: number,
+    agreedAmount?: number,
+    paidAmount?: number,
+    pendingAmount?: number
+  },
+
+  contract?: {
+    storageKey?: string,
+    fileName?: string
+  },
+
+  notes?: string,
+
+  status: "ACTIVE" | "COMPLETED" | "CANCELLED",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+---
+
+# 16. EventVendor Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+  eventId: ObjectId,
+  vendorId: ObjectId,
+
+  notes?: string,
+
+  createdAt: Date
+}
+```
+
+Unique index:
+
+```text
+{ eventId: 1, vendorId: 1 }
+```
+
+---
+
+# 17. Expense Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  eventId?: ObjectId,
+  vendorId?: ObjectId,
+
+  category: string,
+
+  title: string,
+
+  amount: number,
+  paidAmount: number,
+
+  paymentStatus:
+    "PENDING" |
+    "PARTIALLY_PAID" |
+    "PAID",
+
+  paymentMethod?:
+    "CASH" |
+    "UPI" |
+    "CARD" |
+    "BANK_TRANSFER" |
+    "OTHER",
+
+  expenseDate?: Date,
+
+  receipt?: {
+    storageKey?: string,
+    fileName?: string
+  },
+
+  notes?: string,
+
+  createdBy: ObjectId,
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Indexes:
+
+```text
+{ weddingId: 1, expenseDate: -1 }
+{ weddingId: 1, paymentStatus: 1 }
+{ weddingId: 1, eventId: 1 }
+{ weddingId: 1, vendorId: 1 }
+```
+
+---
+
+# 18. Invitation Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  guestId: ObjectId,
+
+  eventIds: ObjectId[],
+
+  tokenHash: string,
+
+  status:
+    "DRAFT" |
+    "SENT" |
+    "OPENED" |
+    "RESPONDED",
+
+  sentAt?: Date,
+  openedAt?: Date,
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Index:
+
+```text
+tokenHash: unique
+```
+
+The raw invitation token should not be stored directly where avoidable. Store a secure hash and resolve the incoming token server-side.
+
+---
+
+# 19. RSVP Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  eventGuestId: ObjectId,
+
+  response:
+    "ACCEPTED" |
+    "DECLINED" |
+    "PENDING",
+
+  attendeeCount: number,
+
+  accommodationRequired: boolean,
+  transportRequired: boolean,
+
+  mealPreference?: string,
+
+  submittedAt?: Date,
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Unique index:
+
+```text
+eventGuestId: unique
+```
+
+---
+
+# 20. Document Schema
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  eventId?: ObjectId,
+
+  uploadedBy: ObjectId,
+
+  category:
+    "CONTRACT" |
+    "INVOICE" |
+    "RECEIPT" |
+    "TRAVEL" |
+    "MARRIAGE_DOCUMENT" |
+    "OTHER",
+
+  fileName: string,
+  storageKey: string,
+
+  mimeType: string,
+  fileSize: number,
+
+  visibility:
+    "PRIVATE" |
+    "MEMBERS" |
+    "EVENT_MEMBERS",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+Actual files are stored in S3-compatible object storage.
+
+MongoDB stores metadata and storage references.
+
+---
+
+# 21. Photo and Album Schemas
+
+## Album
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+  eventId?: ObjectId,
+
+  name: string,
+
+  visibility:
+    "PRIVATE" |
+    "MEMBERS" |
+    "PUBLIC",
+
+  createdBy: ObjectId,
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+## Photo
+
+```typescript
+{
+  _id: ObjectId,
+
+  weddingId: ObjectId,
+
+  eventId?: ObjectId,
+  albumId?: ObjectId,
+
+  uploadedBy: ObjectId,
+
+  storageKey: string,
+
+  mimeType: string,
+  fileSize: number,
+
+  moderationStatus:
+    "PENDING" |
+    "APPROVED" |
+    "REJECTED",
+
+  createdAt: Date,
+  updatedAt: Date
+}
+```
+
+---
+
+# 22. MongoDB Indexing Strategy
+
+Indexes should be designed around actual application queries.
+
+Important indexes include:
 
 ```text
 users
+ └── email
+
 weddings
-wedding_members
-roles
-permissions
-role_permissions
+ └── ownerId
 
- events
+weddingMembers
+ ├── { weddingId, userId } UNIQUE
+ └── { userId, status }
+
+events
+ ├── { weddingId, date }
+ └── { weddingId, sortOrder }
+
 guests
-event_guests
+ ├── { weddingId, name }
+ ├── { weddingId, phone }
+ └── { weddingId, email }
 
- tasks
-task_assignees
+eventGuests
+ ├── { eventId, guestId } UNIQUE
+ ├── { weddingId, eventId }
+ └── { weddingId, guestId }
 
- vendors
-event_vendors
+tasks
+ ├── { weddingId, status }
+ ├── { weddingId, dueDate }
+ └── { weddingId, eventId }
 
- expenses
-expense_categories
-payments
+vendors
+ └── { weddingId, category }
 
- invitations
-invitation_events
+eventVendors
+ └── { eventId, vendorId } UNIQUE
 
- rsvps
-reminders
-notifications
+expenses
+ ├── { weddingId, expenseDate }
+ ├── { weddingId, paymentStatus }
+ ├── { weddingId, eventId }
+ └── { weddingId, vendorId }
 
- venues
+invitations
+ └── tokenHash UNIQUE
 
- accommodations
-rooms
-guest_rooms
+rsvps
+ └── eventGuestId UNIQUE
 
- transports
-vehicles
-drivers
-guest_transports
+documents
+ ├── { weddingId, category }
+ └── { weddingId, eventId }
 
- documents
-
- websites
-website_settings
-
- albums
 photos
-photo_uploads
+ ├── { weddingId, albumId }
+ └── { weddingId, eventId }
 
- live_streams
-issues
-
- audit_logs
+auditLogs
+ ├── { weddingId, createdAt }
+ └── { weddingId, userId }
 ```
+
+Indexes should be reviewed as the application's query patterns evolve.
 
 ---
 
-# 8. Important Entity Relationships
+# 23. MongoDB Multi-Tenancy Strategy
 
-## Wedding → Events
+My Marriage uses **logical multi-tenancy**.
 
-```text
-Wedding 1 ─────────── N Events
-```
-
-## Wedding → Guests
-
-```text
-Wedding 1 ─────────── N Guests
-```
-
-## Event ↔ Guest
-
-Many-to-many through `event_guests`:
-
-```text
-Event 1 ─────── N EventGuest N ─────── 1 Guest
-```
-
-## Event ↔ Vendor
-
-```text
-Event 1 ─────── N EventVendor N ─────── 1 Vendor
-```
-
-## Event → RSVP
-
-RSVP should be associated with `event_guest`, not only `guest`.
-
-```text
-Guest
-  │
-  ▼
-EventGuest
-  │
-  ▼
-RSVP
-```
-
-## Event → Check-In
-
-```text
-EventGuest
-    │
-    ▼
-CheckIn
-```
-
-## Wedding → Expense
-
-Expenses may optionally reference an event and/or vendor.
-
-```text
-Wedding
-   │
-   └── Expense ── optional ── Event
-                  optional ── Vendor
-```
-
----
-
-# 9. Suggested Database Schema
-
-## users
-
-```text
-id UUID PK
-name VARCHAR
-email VARCHAR UNIQUE
-phone VARCHAR
-password_hash VARCHAR
-profile_image_url VARCHAR NULL
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## weddings
-
-```text
-id UUID PK
-owner_id UUID FK users.id
-name VARCHAR
-couple_name_1 VARCHAR
-couple_name_2 VARCHAR
-wedding_date DATE NULL
-city VARCHAR NULL
-venue_name VARCHAR NULL
-venue_address TEXT NULL
-budget DECIMAL NULL
-privacy_status VARCHAR
-status VARCHAR
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## wedding_members
-
-```text
-id UUID PK
-wedding_id UUID FK
-user_id UUID FK
-role_id UUID FK
-created_at TIMESTAMP
-updated_at TIMESTAMP
-
-UNIQUE(wedding_id, user_id)
-```
-
-## events
-
-```text
-id UUID PK
-wedding_id UUID FK
-name VARCHAR
-description TEXT NULL
-event_date DATE
-start_time TIME NULL
-end_time TIME NULL
-venue_name VARCHAR NULL
-venue_address TEXT NULL
-dress_code VARCHAR NULL
-notes TEXT NULL
-sort_order INTEGER
-status VARCHAR
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## guests
-
-```text
-id UUID PK
-wedding_id UUID FK
-household_id UUID NULL
-name VARCHAR
-email VARCHAR NULL
-phone VARCHAR NULL
-relationship VARCHAR NULL
-address TEXT NULL
-plus_one_allowed BOOLEAN
-notes TEXT NULL
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## event_guests
-
-```text
-id UUID PK
-event_id UUID FK
-guest_id UUID FK
-invitation_status VARCHAR
-rsvp_status VARCHAR
-check_in_status VARCHAR
-created_at TIMESTAMP
-updated_at TIMESTAMP
-
-UNIQUE(event_id, guest_id)
-```
-
-## tasks
-
-```text
-id UUID PK
-wedding_id UUID FK
-event_id UUID NULL FK
-title VARCHAR
-description TEXT NULL
-priority VARCHAR
-status VARCHAR
-due_date TIMESTAMP NULL
-created_by UUID FK
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## vendors
-
-```text
-id UUID PK
-wedding_id UUID FK
-name VARCHAR
-category VARCHAR
-phone VARCHAR NULL
-email VARCHAR NULL
-address TEXT NULL
-quoted_amount DECIMAL NULL
-agreed_amount DECIMAL NULL
-paid_amount DECIMAL DEFAULT 0
-status VARCHAR
-notes TEXT NULL
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## event_vendors
-
-```text
-id UUID PK
-event_id UUID FK
-vendor_id UUID FK
-notes TEXT NULL
-created_at TIMESTAMP
-
-UNIQUE(event_id, vendor_id)
-```
-
-## expenses
-
-```text
-id UUID PK
-wedding_id UUID FK
-event_id UUID NULL FK
-vendor_id UUID NULL FK
-category_id UUID FK
-title VARCHAR
-amount DECIMAL
-paid_amount DECIMAL
-payment_status VARCHAR
-payment_method VARCHAR NULL
-expense_date DATE NULL
-notes TEXT NULL
-created_by UUID FK
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## invitations
-
-```text
-id UUID PK
-wedding_id UUID FK
-guest_id UUID FK
-token_hash VARCHAR UNIQUE
-status VARCHAR
-sent_at TIMESTAMP NULL
-opened_at TIMESTAMP NULL
-created_at TIMESTAMP
-updated_at TIMESTAMP
-```
-
-## rsvps
-
-```text
-id UUID PK
-event_guest_id UUID FK UNIQUE
-response VARCHAR
-attendee_count INTEGER
-a ccommodation_required BOOLEAN
-transport_required BOOLEAN
-meal_preference VARCHAR NULL
-submitted_at TIMESTAMP NULL
-updated_at TIMESTAMP
-```
-
-## documents
-
-```text
-id UUID PK
-wedding_id UUID FK
-event_id UUID NULL FK
-uploaded_by UUID FK
-category VARCHAR
-file_name VARCHAR
-storage_key VARCHAR
-mime_type VARCHAR
-file_size BIGINT
-visibility VARCHAR
-created_at TIMESTAMP
-```
-
-## photos
-
-```text
-id UUID PK
-wedding_id UUID FK
-event_id UUID NULL FK
-album_id UUID NULL FK
-uploaded_by UUID FK
-storage_key VARCHAR
-mime_type VARCHAR
-file_size BIGINT
-moderation_status VARCHAR
-created_at TIMESTAMP
-```
-
----
-
-# 10. Multi-Tenancy Strategy
-
-My Marriage should use **logical multi-tenancy** with PostgreSQL.
-
-Every tenant-owned table contains `wedding_id` directly where practical.
+Every wedding-owned collection should contain `weddingId`.
 
 Example:
 
-```sql
-SELECT *
-FROM guests
-WHERE wedding_id = :weddingId;
+```typescript
+{
+  weddingId: weddingId,
+  status: "ACTIVE"
+}
 ```
 
-Never allow a client to choose a wedding ID without validating that the authenticated user has access to that wedding.
+Queries should always include the tenant boundary.
 
-## Request Context
+Example:
 
-```text
-JWT / Session
-      │
-      ▼
-Authenticated User
-      │
-      ▼
-Wedding Membership
-      │
-      ▼
-Authorized Wedding Context
-      │
-      ▼
-Business Operation
+```typescript
+Guest.find({
+  weddingId,
+  status: "ACTIVE"
+});
 ```
+
+Never perform a tenant-owned query using only:
+
+```typescript
+Guest.findById(guestId);
+```
+
+without subsequently validating that the guest belongs to the authorized wedding.
+
+A safer repository method is:
+
+```typescript
+Guest.findOne({
+  _id: guestId,
+  weddingId
+});
+```
+
+This makes cross-wedding data access significantly harder to introduce accidentally.
 
 ---
 
-# 11. Authorization Architecture
+# 24. Authorization Architecture
 
 Authorization should happen in multiple layers.
 
@@ -1009,7 +1507,7 @@ Authorization should happen in multiple layers.
 Example guest request:
 
 ```text
-GET /api/events/:eventId
+GET /api/v1/events/:eventId
         │
         ▼
 Is user authenticated?
@@ -1029,7 +1527,7 @@ Return event
 
 ---
 
-# 12. RBAC + Resource Authorization
+# 25. RBAC + Resource Authorization
 
 Permissions should be explicit rather than hardcoded throughout controllers.
 
@@ -1064,7 +1562,7 @@ ADMIN
  └── Most operational permissions
 
 FAMILY_MEMBER
- └── Permissions explicitly assigned
+ └── Explicitly assigned permissions
 
 EVENT_MANAGER
  └── Event-specific permissions
@@ -1078,7 +1576,7 @@ GUEST
 
 ---
 
-# 13. API Architecture
+# 26. API Architecture
 
 Use versioned REST APIs.
 
@@ -1197,7 +1695,7 @@ POST /api/v1/events/:eventId/check-in
 
 ---
 
-# 14. API Response Standard
+# 27. API Response Standard
 
 Successful response:
 
@@ -1236,11 +1734,13 @@ Pagination:
 }
 ```
 
+MongoDB queries should use `skip/limit` initially where appropriate, with cursor-based pagination considered for very large collections or high-volume feeds.
+
 ---
 
-# 15. Dashboard Architecture
+# 28. Dashboard Architecture
 
-The dashboard is an aggregation layer rather than a separate data store.
+The dashboard is an aggregation layer rather than a separate database.
 
 ```text
                          Dashboard API
@@ -1255,45 +1755,28 @@ The dashboard is an aggregation layer rather than a separate data store.
                        │                     │
                        └──────────┬──────────┘
                                   ▼
+                         MongoDB Aggregation
+                                  │
+                                  ▼
                             Dashboard DTO
                                   │
                                   ▼
                                Frontend
 ```
 
-Suggested response:
+MongoDB aggregation pipelines can calculate:
 
-```json
-{
-  "wedding": {},
-  "countdown": {},
-  "nextEvent": {},
-  "upcomingEvents": [],
-  "tasks": {
-    "total": 0,
-    "completed": 0,
-    "pending": 0,
-    "blocked": 0
-  },
-  "guests": {
-    "total": 0,
-    "confirmed": 0,
-    "pending": 0,
-    "declined": 0
-  },
-  "expenses": {
-    "budget": 0,
-    "planned": 0,
-    "spent": 0,
-    "remaining": 0,
-    "pending": 0
-  }
-}
-```
+* Guest totals
+* RSVP counts
+* Expense totals
+* Task completion
+* Upcoming events
+* Vendor counts
+* Check-in statistics
 
 ---
 
-# 16. Invitation and RSVP Flow
+# 29. Invitation and RSVP Flow
 
 ```text
 Couple
@@ -1332,16 +1815,16 @@ EventGuest + RSVP Updated
 Dashboard Updated
 ```
 
-The invitation token should not expose internal database identifiers directly. Store a secure token/hash representation and resolve it server-side.
+Invitation tokens should be securely generated and stored as hashes where possible.
 
 ---
 
-# 17. Wedding Website Architecture
+# 30. Wedding Website Architecture
 
 The wedding website should be a read-oriented projection of existing wedding data.
 
 ```text
-PostgreSQL
+MongoDB
     │
     ▼
 Website Service
@@ -1357,12 +1840,6 @@ Website Service
 Public Wedding Website
 ```
 
-Example:
-
-```text
-my-marriage.com/w/tanvi-and-xyz
-```
-
 Publishing should support:
 
 ```text
@@ -1371,9 +1848,9 @@ DRAFT → PREVIEW → PUBLISHED → UNPUBLISHED
 
 ---
 
-# 18. File and Media Architecture
+# 31. File and Media Architecture
 
-Binary files should not be stored in PostgreSQL.
+Binary files should not be stored directly inside MongoDB for the core implementation.
 
 ```text
 Frontend
@@ -1388,10 +1865,10 @@ Backend validates permission
 Signed Upload URL
    │
    ▼
-Object Storage
+S3-compatible Object Storage
    │
    ▼
-Metadata stored in PostgreSQL
+Metadata stored in MongoDB
 ```
 
 Storage layout:
@@ -1411,7 +1888,7 @@ Use signed URLs for private files.
 
 ---
 
-# 19. Notification Architecture
+# 32. Notification Architecture
 
 Notifications should be asynchronous where possible.
 
@@ -1432,7 +1909,7 @@ Worker
      └── WhatsApp Adapter
 ```
 
-Examples of domain events:
+Potential domain events:
 
 ```text
 RSVP_SUBMITTED
@@ -1444,13 +1921,13 @@ ACCOMMODATION_CHECKIN_SOON
 TRANSPORT_DEPARTURE_SOON
 ```
 
-For the MVP, email and in-app notifications can be implemented first. Redis/BullMQ can be introduced when scheduled jobs and notification volume justify it.
+For the MVP, email and in-app notifications can be implemented first.
+
+Redis + BullMQ can be introduced for scheduled jobs and asynchronous workloads.
 
 ---
 
-# 20. Background Job Architecture
-
-Jobs should handle operations that should not block the main API request.
+# 33. Background Job Architecture
 
 ```text
 Express API
@@ -1474,19 +1951,21 @@ Express API
 
 Potential jobs:
 
-- RSVP reminders
-- Event reminders
-- Task reminders
-- Vendor payment reminders
-- Accommodation reminders
-- Transport reminders
-- Invitation delivery
-- Image processing
-- Analytics aggregation
+* RSVP reminders
+* Event reminders
+* Task reminders
+* Vendor payment reminders
+* Accommodation reminders
+* Transport reminders
+* Invitation delivery
+* Image processing
+* Analytics aggregation
+
+Redis is an infrastructure dependency only when asynchronous/background processing is enabled.
 
 ---
 
-# 21. Wedding Day Mode
+# 34. Wedding Day Mode
 
 Wedding Day Mode should optimize for speed rather than configuration.
 
@@ -1505,11 +1984,11 @@ Wedding Day Mode should optimize for speed rather than configuration.
                     Emergency Contacts
 ```
 
-The interface should prioritize mobile usability because coordinators and family members may use phones while moving around the venue.
+The interface should prioritize mobile usability.
 
 ---
 
-# 22. QR Check-In Architecture
+# 35. QR Check-In Architecture
 
 ```text
 Guest receives invitation
@@ -1535,11 +2014,11 @@ Create CheckIn record
 Update Event Dashboard
 ```
 
-A guest who is invited to the wedding but not to the current event must not be checked in successfully.
+A guest invited to the wedding but not to the current event must not be checked in successfully.
 
 ---
 
-# 23. Accommodation Architecture
+# 36. Accommodation Architecture
 
 ```text
 Wedding
@@ -1568,11 +2047,9 @@ Room Assignment
 Check-in / Check-out
 ```
 
-Accommodation can integrate with transport planning.
-
 ---
 
-# 24. Transportation Architecture
+# 37. Transportation Architecture
 
 ```text
 Transport Plan
@@ -1585,23 +2062,9 @@ Transport Plan
       └── Assigned Guests
 ```
 
-Example:
-
-```text
-Hotel
-  ↓
-10:00 AM
-  ↓
-Bus 01
-  ↓
-Wedding Venue
-  ↓
-Guests A, B, C, D
-```
-
 ---
 
-# 25. Vendor and Expense Flow
+# 38. Vendor and Expense Flow
 
 ```text
 Vendor
@@ -1632,9 +2095,7 @@ PAID
 
 ---
 
-# 26. Document Architecture
-
-Documents should be protected by wedding-level and role-level authorization.
+# 39. Document Architecture
 
 ```text
 Document Request
@@ -1659,7 +2120,7 @@ Sensitive documents should never be publicly accessible through permanent URLs.
 
 ---
 
-# 27. Memories Architecture
+# 40. Memories Architecture
 
 ```text
 Wedding
@@ -1674,7 +2135,7 @@ Wedding
               └── Photos
 ```
 
-Guest uploads should optionally pass through moderation:
+Guest uploads can optionally pass through moderation:
 
 ```text
 UPLOADED
@@ -1688,26 +2149,26 @@ VISIBLE
 
 ---
 
-# 28. Caching Strategy
+# 41. Caching Strategy
 
 Caching should be introduced selectively.
 
 Good candidates:
 
-- Public wedding website data
-- Public event information
-- Frequently requested dashboard summaries
-- Permission metadata
-- Rate limiting
-- Temporary invitation/session information
+* Public wedding website data
+* Public event information
+* Frequently requested dashboard summaries
+* Permission metadata
+* Rate limiting
+* Temporary invitation/session information
 
 Avoid caching highly mutable financial or authorization data unless invalidation is carefully designed.
 
-Redis can be added without changing the core architecture.
+Redis can be added without changing the core MongoDB architecture.
 
 ---
 
-# 29. Search, Filtering and Pagination
+# 42. Search, Filtering and Pagination
 
 Large collections should never be loaded completely into the browser.
 
@@ -1728,7 +2189,9 @@ Use server-side pagination:
 GET /api/v1/weddings/:weddingId/guests?page=1&limit=25&search=rahul
 ```
 
-Filtering examples:
+MongoDB indexes should support the most common search/filter combinations.
+
+For example:
 
 ```text
 Guests:
@@ -1752,20 +2215,22 @@ Tasks:
 - Due date
 ```
 
+MongoDB Atlas Search can be considered later if full-text search becomes a requirement.
+
 ---
 
-# 30. Frontend Architecture
+# 43. Frontend Architecture
 
 Recommended frontend stack:
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- TanStack Query
-- React Hook Form
-- Zod
-- Zustand where client-side global state is genuinely needed
+* Next.js
+* React
+* TypeScript
+* Tailwind CSS
+* TanStack Query
+* React Hook Form
+* Zod
+* Zustand where client-side global state is genuinely needed
 
 Frontend structure:
 
@@ -1811,9 +2276,7 @@ frontend/
 
 ---
 
-# 31. Frontend Routing
-
-Example application routes:
+# 44. Frontend Routing
 
 ```text
 /login
@@ -1842,7 +2305,7 @@ Example application routes:
 
 ---
 
-# 32. State Management Strategy
+# 45. State Management Strategy
 
 Do not put all application data into a global client store.
 
@@ -1874,7 +2337,7 @@ Forms should use React Hook Form + Zod.
 
 ---
 
-# 33. Security Architecture
+# 46. Security Architecture
 
 ## Authentication
 
@@ -1882,7 +2345,9 @@ Use secure authentication with short-lived access credentials and refresh/sessio
 
 ## Passwords
 
-Passwords must be hashed using Argon2id or bcrypt. Never store plaintext passwords.
+Passwords must be hashed using Argon2id or bcrypt.
+
+Never store plaintext passwords.
 
 ## Authorization
 
@@ -1902,44 +2367,44 @@ Event access if applicable
 
 ## API Security
 
-- HTTPS everywhere
-- CORS allowlist
-- Secure HTTP headers
-- Rate limiting
-- Request validation
-- Output sanitization where needed
-- Parameterized database queries through Prisma
-- Audit logging
-- Secure cookies/session handling where applicable
+* HTTPS everywhere
+* CORS allowlist
+* Secure HTTP headers
+* Rate limiting
+* Request validation
+* Output sanitization where needed
+* Mongoose query safety
+* Audit logging
+* Secure cookies/session handling where applicable
 
 ## File Security
 
-- MIME type validation
-- File size limits
-- Extension validation
-- Malware scanning where appropriate
-- Private storage by default
-- Signed URLs
-- Authorization before generating URLs
+* MIME type validation
+* File size limits
+* Extension validation
+* Malware scanning where appropriate
+* Private storage by default
+* Signed URLs
+* Authorization before generating URLs
 
 ---
 
-# 34. Audit Logging
+# 47. Audit Logging
 
 Important administrative operations should create audit records.
 
 ```text
-audit_logs
+auditLogs
 ----------
-id
-wedding_id
-user_id
+_id
+weddingId
+userId
 action
-resource_type
-resource_id
+resourceType
+resourceId
 metadata
-ip_address
-created_at
+ipAddress
+createdAt
 ```
 
 Examples:
@@ -1960,7 +2425,7 @@ CHECKIN_CREATED
 
 ---
 
-# 35. Error Handling
+# 48. Error Handling
 
 Use centralized error handling.
 
@@ -1993,7 +2458,7 @@ Never expose stack traces or internal implementation details in production API r
 
 ---
 
-# 36. Observability
+# 49. Observability
 
 Production observability should include:
 
@@ -2009,13 +2474,13 @@ Application Logs
 Metrics
        ├── API latency
        ├── Error rate
-       ├── Database latency
+       ├── MongoDB latency
        ├── Queue failures
        └── Background job duration
 
 Monitoring
-       ├── Availability
-       ├── Database health
+       ├── Application availability
+       ├── MongoDB health
        └── Storage health
 ```
 
@@ -2023,53 +2488,31 @@ Avoid logging passwords, tokens, invitation secrets, or sensitive document conte
 
 ---
 
-# 37. Performance Architecture
+# 50. Performance Architecture
 
 Key strategies:
 
-- Server-side pagination
-- Database indexes
-- Efficient Prisma queries
-- Avoid N+1 queries
-- Select only required fields
-- Lazy-load heavy UI modules
-- Image optimization
-- CDN for public assets
-- Object storage for media
-- Background processing for heavy operations
-- Cache carefully selected read-heavy data
-
-Important database indexes:
-
-```text
-weddings.owner_id
-wedding_members.wedding_id
-wedding_members.user_id
-events.wedding_id
-events.event_date
-guests.wedding_id
-event_guests.event_id
-event_guests.guest_id
-tasks.wedding_id
-tasks.event_id
-tasks.status
-expenses.wedding_id
-expenses.event_id
-expenses.vendor_id
-invitations.token_hash
-rsvps.event_guest_id
-documents.wedding_id
-photos.wedding_id
-photos.event_id
-```
+* Server-side pagination
+* MongoDB indexes
+* Efficient Mongoose queries
+* Avoid N+1 queries
+* Use `.lean()` for read-only queries where appropriate
+* Select only required fields
+* Lazy-load heavy UI modules
+* Image optimization
+* CDN for public assets
+* Object storage for media
+* Background processing for heavy operations
+* Cache carefully selected read-heavy data
+* Use MongoDB aggregation pipelines for dashboard calculations
 
 ---
 
-# 38. Transaction Boundaries
+# 51. MongoDB Transaction Strategy
 
-Use database transactions for operations that must succeed or fail together.
+MongoDB supports multi-document transactions when an operation genuinely requires atomic updates across collections.
 
-Example: assigning a guest to an event and creating related invitation state.
+Example:
 
 ```text
 BEGIN TRANSACTION
@@ -2082,21 +2525,27 @@ BEGIN TRANSACTION
 COMMIT
 ```
 
-If one operation fails:
+If an operation fails:
 
 ```text
 ROLLBACK
 ```
 
-Other examples:
+Potential transaction use cases:
 
-- Vendor payment + payment record update
-- Room assignment + accommodation status
-- Event deletion/archive with dependent state changes
+* Creating an event and associated configuration.
+* Assigning a guest to an event and creating related state.
+* Recording a payment and updating payment-related fields.
+* Assigning accommodation and updating room occupancy.
+* Complex administrative operations involving multiple collections.
+
+Do not use transactions for every operation. Prefer a single atomic document update whenever the data model allows it.
+
+MongoDB transactions require the appropriate deployment configuration, such as a replica set or MongoDB Atlas cluster.
 
 ---
 
-# 39. Domain Events
+# 52. Domain Events
 
 The modular monolith can use an internal event bus to reduce coupling.
 
@@ -2120,34 +2569,36 @@ EVENT_CREATED
       └── Optional notification scheduling
 ```
 
-These are internal application events, not necessarily distributed microservice events.
+These are internal application events, not distributed microservice events.
 
 ---
 
-# 40. Testing Architecture
+# 53. Testing Architecture
 
 ## Unit Tests
 
 Test:
 
-- Business rules
-- Permission checks
-- Budget calculations
-- RSVP rules
-- Guest event-access rules
-- Task state transitions
+* Business rules
+* Permission checks
+* Budget calculations
+* RSVP rules
+* Guest event-access rules
+* Task state transitions
 
 ## Integration Tests
 
 Test:
 
-- API + database
-- Authentication
-- Authorization
-- EventGuest access
-- RSVP flow
-- Expense flow
-- Invitation flow
+* API + MongoDB
+* Authentication
+* Authorization
+* EventGuest access
+* RSVP flow
+* Expense flow
+* Invitation flow
+
+A dedicated test MongoDB instance or ephemeral MongoDB environment should be used for integration testing.
 
 ## End-to-End Tests
 
@@ -2182,7 +2633,7 @@ Owner → allowed
 
 ---
 
-# 41. CI/CD Architecture
+# 54. CI/CD Architecture
 
 ```text
 Developer
@@ -2193,7 +2644,7 @@ Git Push / Pull Request
     ▼
 GitHub Actions
     │
-    ├── Install
+    ├── Install dependencies
     ├── Lint
     ├── Type Check
     ├── Unit Tests
@@ -2218,11 +2669,13 @@ Staging
 Production
 ```
 
-Database migrations should be version-controlled through Prisma migrations.
+MongoDB schema/index changes should be version-controlled through application migration scripts or controlled Mongoose/index-management processes.
+
+Unlike Prisma migrations, MongoDB does not require a relational migration file for every schema change. Changes should be handled through versioned migration scripts when existing production documents require transformation.
 
 ---
 
-# 42. Deployment Architecture
+# 55. Deployment Architecture
 
 ## MVP Deployment
 
@@ -2238,8 +2691,8 @@ Database migrations should be version-controlled through Prisma migrations.
                                   │
                          ┌────────┼────────┐
                          ▼        ▼        ▼
-                    PostgreSQL Object   Optional
-                              Storage    Redis
+                     MongoDB   Object    Optional
+                     Atlas     Storage   Redis
 ```
 
 ## Production Growth
@@ -2259,7 +2712,7 @@ Database migrations should be version-controlled through Prisma migrations.
                                         │
                      ┌──────────────────┼──────────────────┐
                      ▼                  ▼                  ▼
-                PostgreSQL          Redis             Object Storage
+                 MongoDB Atlas       Redis             Object Storage
                                         │
                                         ▼
                                    BullMQ Workers
@@ -2269,14 +2722,14 @@ The modular monolith can be horizontally scaled by running multiple API instance
 
 ---
 
-# 43. Scalability Strategy
+# 56. Scalability Strategy
 
 ## Stage 1 - MVP
 
 ```text
 1 Frontend
 1 API
-1 PostgreSQL
+1 MongoDB
 Object Storage
 ```
 
@@ -2284,7 +2737,7 @@ Object Storage
 
 ```text
 Multiple API instances
-Managed PostgreSQL
+Managed MongoDB Atlas
 Redis
 Background Workers
 CDN
@@ -2307,13 +2760,13 @@ Do not split the system into microservices merely because there are many modules
 
 ---
 
-# 44. Disaster Recovery
+# 57. Disaster Recovery
 
 Required backups:
 
 ```text
-PostgreSQL
-   └── Automated backups
+MongoDB Atlas
+   └── Automated backups / point-in-time recovery
 
 Object Storage
    └── Versioning / backup policy
@@ -2327,8 +2780,8 @@ Configuration
 
 Recovery priorities:
 
-1. PostgreSQL
-2. Object storage metadata/content
+1. MongoDB data
+2. Object storage content
 3. Application deployment
 4. Background jobs
 
@@ -2336,7 +2789,7 @@ The product should define Recovery Point Objective (RPO) and Recovery Time Objec
 
 ---
 
-# 45. Data Lifecycle
+# 58. Data Lifecycle
 
 Wedding data may remain useful long after the wedding.
 
@@ -2354,7 +2807,7 @@ Memories / Archive
 
 Do not automatically delete completed wedding data.
 
-Instead use lifecycle states:
+Use lifecycle states:
 
 ```text
 DRAFT
@@ -2367,7 +2820,7 @@ Archive behavior should be defined separately from deletion.
 
 ---
 
-# 46. Key End-to-End Architecture Flows
+# 59. Key End-to-End Architecture Flows
 
 ## Guest Invitation Flow
 
@@ -2410,7 +2863,7 @@ Validate Event/Vendor
     ↓
 Save Expense
     ↓
-Update Budget Summary
+MongoDB Aggregation / Summary
     ↓
 Dashboard Refresh
 ```
@@ -2457,7 +2910,7 @@ Guest / Visitor
 
 ---
 
-# 47. Recommended Backend Project Structure
+# 60. Recommended Backend Project Structure
 
 ```text
 backend/
@@ -2468,7 +2921,8 @@ backend/
 │   ├── config/
 │   │   ├── env.ts
 │   │   ├── database.ts
-│   │   └── storage.ts
+│   │   ├── storage.ts
+│   │   └── redis.ts
 │   │
 │   ├── middleware/
 │   │   ├── auth.middleware.ts
@@ -2513,6 +2967,12 @@ backend/
 │   │   ├── maps/
 │   │   └── streaming/
 │   │
+│   ├── database/
+│   │   ├── models/
+│   │   ├── repositories/
+│   │   ├── indexes/
+│   │   └── migrations/
+│   │
 │   ├── shared/
 │   │   ├── errors/
 │   │   ├── types/
@@ -2520,10 +2980,6 @@ backend/
 │   │   └── constants/
 │   │
 │   └── tests/
-│
-├── prisma/
-│   ├── schema.prisma
-│   └── migrations/
 │
 ├── Dockerfile
 ├── docker-compose.yml
@@ -2533,7 +2989,7 @@ backend/
 
 ---
 
-# 48. Recommended Frontend Project Structure
+# 61. Recommended Frontend Project Structure
 
 ```text
 frontend/
@@ -2581,9 +3037,9 @@ frontend/
 
 ---
 
-# 49. Recommended MVP Build Order
+# 62. Recommended MVP Build Order
 
-The implementation should follow dependency order rather than feature popularity.
+The implementation should follow dependency order.
 
 ```text
 Phase 1
@@ -2635,45 +3091,67 @@ Memories
 
 ---
 
-# 50. Architecture Decision Records
+# 63. Architecture Decision Records
 
 ## ADR-001: Modular Monolith
 
 **Decision:** Use a modular monolith for the initial product.
 
-**Reason:** The domains are strongly related and the team benefits from simple deployment and transactions. Module boundaries preserve future extraction options.
+**Reason:** The domains are strongly related and the team benefits from simple deployment and operational complexity. Module boundaries preserve future extraction options.
 
-## ADR-002: PostgreSQL
+---
 
-**Decision:** Use PostgreSQL rather than MongoDB for core transactional data.
+## ADR-002: MongoDB
 
-**Reason:** The product has many relationships and constraints: events, event guests, RSVPs, vendors, expenses, accommodation, transportation and permissions.
+**Decision:** Use MongoDB as the primary application database.
 
-## ADR-003: EventGuest as a First-Class Relationship
+**Reason:** The application contains a mixture of structured relationships and flexible, evolving wedding-specific data. MongoDB's document model works well for configuration-heavy entities while references can maintain relationships between independently managed entities.
 
-**Decision:** Model event-level guest access using `event_guests`.
+The application will use a hybrid embedding/reference strategy rather than either embedding everything or referencing everything.
+
+---
+
+## ADR-003: Mongoose
+
+**Decision:** Use Mongoose as the ODM.
+
+**Reason:** Mongoose provides schema definitions, validation, middleware, indexes, references, model organization, and a consistent data-access abstraction for the Node.js backend.
+
+---
+
+## ADR-004: EventGuest as a First-Class Relationship
+
+**Decision:** Model event-level guest access using `eventGuests`.
 
 **Reason:** The same guest can attend some wedding events and not others. RSVP and check-in are also event-specific.
 
-## ADR-004: Object Storage for Files
+---
 
-**Decision:** Store media/documents in object storage and metadata in PostgreSQL.
+## ADR-005: Object Storage for Files
 
-**Reason:** Photos, videos, receipts and documents can become large and should not be stored as database blobs.
+**Decision:** Store media/documents in S3-compatible object storage and metadata in MongoDB.
 
-## ADR-005: REST API
+**Reason:** Photos, videos, receipts, and documents can become large and should not be stored directly in MongoDB.
+
+---
+
+## ADR-006: REST API
 
 **Decision:** Use REST for the initial API.
 
-**Reason:** The domain maps naturally to resources, it is straightforward to document and test, and it keeps the initial architecture simple.
+**Reason:** The domain maps naturally to resources, REST is straightforward to document and test, and it keeps the initial architecture simple.
 
-## ADR-006: Async Notifications
+---
+
+## ADR-007: Async Notifications
 
 **Decision:** Use background jobs for scheduled and non-critical notification work.
 
 **Reason:** Notification delivery should not block core wedding operations.
 
-## ADR-007: AI Is Not a Core Dependency
+---
+
+## ADR-008: AI Is Not a Core Dependency
 
 **Decision:** Keep AI features outside the critical path.
 
@@ -2681,7 +3159,7 @@ Memories
 
 ---
 
-# 51. Future AI Extension Point
+# 64. Future AI Extension Point
 
 The architecture should leave room for AI without making the core system dependent on it.
 
@@ -2704,19 +3182,19 @@ Core Product
 
 Potential future capabilities:
 
-- Generate task plans
-- Suggest wedding timelines
-- Summarize wedding status
-- Identify overdue tasks
-- Explain budget trends
-- Draft guest communication
-- Recommend reminder schedules
+* Generate task plans.
+* Suggest wedding timelines.
+* Summarize wedding status.
+* Identify overdue tasks.
+* Explain budget trends.
+* Draft guest communication.
+* Recommend reminder schedules.
 
-AI should operate through controlled APIs and permissions and should never bypass existing authorization rules.
+AI should operate through controlled APIs and existing authorization rules.
 
 ---
 
-# 52. Final Architecture
+# 65. Final Architecture
 
 ```text
                               MY MARRIAGE
@@ -2748,7 +3226,8 @@ AI should operate through controlled APIs and permissions and should never bypas
                                   └── Issues
                                   │
                                   ▼
-                             PostgreSQL
+                              MongoDB
+                              + Mongoose
                                   │
                   ┌───────────────┼───────────────┐
                   ▼               ▼               ▼
@@ -2760,40 +3239,45 @@ AI should operate through controlled APIs and permissions and should never bypas
 
 ---
 
-# 53. Final Architecture Summary
+# 66. Final Architecture Summary
 
-| Concern | Decision |
-|---|---|
-| Architecture | Modular Monolith |
-| Frontend | Next.js + React + TypeScript |
-| Backend | Node.js + Express.js |
-| Database | PostgreSQL |
-| ORM | Prisma |
-| API | REST /api/v1 |
-| Authentication | Secure session/token-based authentication |
-| Authorization | RBAC + resource-level + event-level authorization |
-| Multi-tenancy | Logical tenant isolation using wedding_id |
-| Guest Access | Wedding → Event → EventGuest → Guest |
-| Server State | TanStack Query |
-| Client State | Zustand where required |
-| Validation | Zod |
-| Files | S3-compatible Object Storage |
-| Background Jobs | BullMQ + Redis when needed |
-| Notifications | Email first; SMS/WhatsApp later |
-| Website | Data-driven public/private wedding pages |
-| Streaming | Third-party provider |
-| Testing | Jest + Supertest + Playwright |
-| CI/CD | GitHub Actions |
-| Deployment | Docker |
-| Scaling | Horizontal API scaling before service extraction |
-| Future Services | Notifications, media, analytics, website delivery if justified |
-| AI | Optional extension, never a core dependency |
+| Concern          | Decision                                                                   |
+| ---------------- | -------------------------------------------------------------------------- |
+| Architecture     | Modular Monolith                                                           |
+| Frontend         | Next.js + React + TypeScript                                               |
+| Backend          | Node.js + Express.js + TypeScript                                          |
+| Database         | MongoDB                                                                    |
+| ODM              | Mongoose                                                                   |
+| API              | REST `/api/v1`                                                             |
+| Authentication   | Secure session/token-based authentication                                  |
+| Authorization    | RBAC + resource-level + event-level authorization                          |
+| Multi-tenancy    | Logical tenant isolation using `weddingId`                                 |
+| Guest Access     | Wedding → Event → EventGuest → Guest                                       |
+| Server State     | TanStack Query                                                             |
+| Client State     | Zustand where required                                                     |
+| Validation       | Zod                                                                        |
+| Files            | S3-compatible Object Storage                                               |
+| Background Jobs  | BullMQ + Redis when needed                                                 |
+| Notifications    | Email first; SMS/WhatsApp later                                            |
+| Website          | Data-driven public/private wedding pages                                   |
+| Streaming        | Third-party provider                                                       |
+| Testing          | Jest + Supertest + Playwright                                              |
+| CI/CD            | GitHub Actions                                                             |
+| Deployment       | Docker                                                                     |
+| Scaling          | Horizontal API scaling before service extraction                           |
+| Database Scaling | MongoDB Atlas scaling, indexes, aggregation, and appropriate schema design |
+| Future Services  | Notifications, media, analytics, website delivery if justified             |
+| AI               | Optional extension, never a core dependency                                |
 
 ---
 
-# 54. Most Important Architectural Decision
+# 67. Most Important Architectural Decision
 
-The core of My Marriage is not simply the wedding dashboard. It is the relationship between **Wedding, Event, Guest, and EventGuest**.
+The core of My Marriage is not simply the wedding dashboard.
+
+It is the relationship between:
+
+**Wedding → Event → Guest → EventGuest**
 
 ```text
                          Wedding
@@ -2816,6 +3300,6 @@ The core of My Marriage is not simply the wedding dashboard. It is the relations
 
 This model enables the platform to support the complexity of Indian weddings while keeping authorization, invitations, RSVPs, accommodation, transport, check-in, and wedding-day execution connected to the same source of truth.
 
-The architectural goal is therefore:
+The architectural goal is:
 
-> **One wedding system of record, with strong event-level access control and modular business domains.**
+> **One wedding system of record, with strong event-level access control and modular business domains, powered by MongoDB's document-oriented data model.**
