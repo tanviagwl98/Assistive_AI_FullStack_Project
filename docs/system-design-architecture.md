@@ -6,7 +6,7 @@
 **Frontend:** Next.js / React / TypeScript  
 **Backend:** Node.js / Express.js  
 **Database:** MongoDB  
-**ORM:** Prisma  
+**ODM:** Mongoose  
 **Storage:** S3-compatible Object Storage  
 **API Style:** REST  
 **Deployment:** Docker + GitHub Actions  
