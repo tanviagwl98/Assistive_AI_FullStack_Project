@@ -1,1118 +1,1551 @@
-# MY MARRIAGE
+# My Marriage
+## Product Requirements Document
 
-## Product Requirements Document (PRD)
-
-### Wedding Planning & Management Platform | Initial Product Specification
+**Version:** V1  
+**Status:** Approved for System Design  
+**Product Type:** Web Application  
+**Primary Market:** Indian Weddings
 
 ---
 
 # 1. Product Overview
 
-**Product Name:** My Marriage
-**Product Type:** Wedding Planning and Management Platform
-**Primary Market:** Indian weddings
-**Initial Platform:** Responsive web application
-**Primary Users:** Couples, families, wedding coordinators, vendors, and guests
+## 1.1 Product Name
 
-**Product Approach:**
-A connected wedding operating system that centralizes planning, guest management, communication, execution, and post-wedding memories.
+**Make My Marriage**
 
----
+## 1.2 Product Vision
 
-# 2. Product Vision
+Make My Marriage is a digital wedding management platform that helps couples and their families collaboratively plan and manage an Indian wedding from one place.
 
-My Marriage aims to become a single system of record for a wedding.
+Indian weddings involve multiple events, dozens of tasks, many family members, hundreds of guests, vendors, expenses, invitations, photos, and several moving pieces.
 
-Instead of managing wedding information across WhatsApp conversations, spreadsheets, documents, calls, emails, and paper, users should be able to manage the complete wedding lifecycle from one platform.
+Most families currently manage this using a combination of:
 
-The product should be especially useful for Indian weddings, where one wedding can contain multiple events, different guest groups, multiple families, vendors, payments, accommodation, transportation, and rapidly changing schedules.
+- WhatsApp groups
+- Excel sheets
+- Notes
+- Phone calls
+- Google Docs
+- Paper lists
+- Different vendor conversations
+- Shared photo folders
 
----
+Make My Marriage brings these activities together inside one structured wedding workspace.
 
-# 3. Problem Statement
+The product should feel like:
 
-* Wedding information is scattered across multiple tools and conversations.
-* Couples and families struggle to understand what needs to be done, by whom, and by when.
-* The same guest may be invited to some events but not others.
-* RSVPs, accommodation, transportation, and check-ins need to be event-specific.
-* Vendor payments, expenses, contracts, and receipts are difficult to track centrally.
-* Last-minute wedding-day changes are difficult to communicate and coordinate.
-* Guests often receive information through fragmented messages instead of one reliable source.
-* Wedding websites and invitations often require duplicate data entry.
+> **The operating system for managing an Indian wedding.**
 
 ---
 
-# 4. Product Goals
+# 2. Problem Statement
 
-* Allow a couple to create and configure a complete wedding.
-* Support multiple wedding events with independent schedules and guest access.
-* Provide role-based access for couples, family members, coordinators, vendors, and guests.
-* Centralize tasks, vendors, expenses, payments, and documents.
-* Manage digital invitations and event-level RSVPs.
-* Provide accommodation and transportation management.
-* Generate a wedding website from existing wedding data.
-* Provide a wedding-day execution dashboard.
-* Support post-wedding memories, photographs, and documents.
-* Create a strong foundation for future automation and AI features without making AI a dependency for the core product.
-* Use MongoDB's flexible document model for wedding data that contains both shared and event-specific information.
+Planning an Indian wedding is collaborative but highly fragmented.
 
----
+A typical wedding may involve:
 
-# 5. Non-Goals for the Initial Version
+- Bride and groom
+- Parents
+- Siblings
+- Cousins
+- Friends
+- Multiple wedding events
+- Hundreds of guests
+- Multiple vendors
+- Many expenses
+- Invitations and RSVPs
+- Wedding photos
+- Livestream requirements
+- Constant coordination
 
-* Building an AI wedding planner as the core product.
-* Operating proprietary live-streaming infrastructure.
-* Replacing official government marriage-registration portals or legal processes.
-* Building a full payment gateway or financial service.
-* Replacing WhatsApp or other general-purpose messaging platforms.
-* Building a vendor marketplace in the first release.
-* Advanced photo/video editing.
-* Native mobile applications in the first release.
+There is usually no single source of truth.
 
----
+One family member tracks guests in Excel.
 
-# 6. User Personas
+Someone else tracks expenses.
 
-## 6.1 Couple
+Tasks are discussed inside WhatsApp groups.
 
-The primary product owner.
+Vendor details are stored in individual phones.
 
-Creates the wedding, manages events, guests, budget, vendors, tasks, invitations, and permissions.
+Invitations are shared separately.
 
-## 6.2 Wedding Admin / Family Member
+Wedding photos get scattered across dozens of devices after the wedding.
 
-A trusted person who can manage selected areas of the wedding based on assigned permissions.
-
-## 6.3 Event Manager / Coordinator
-
-Manages specific wedding events, schedules, vendors, tasks, and guest-related operations.
-
-## 6.4 Vendor
-
-A service provider such as a photographer, caterer, decorator, makeup artist, venue, transport provider, or planner.
-
-Vendor access should be limited to information relevant to their work.
-
-## 6.5 Guest
-
-Views the events they are invited to, receives invitations and reminders, submits RSVPs, accesses relevant venue and travel information, and can use event-specific check-in and live-stream features.
+Make My Marriage aims to solve this by providing one central wedding workspace.
 
 ---
 
-# 7. Core Product Architecture
+# 3. Target Users
 
-The central relationship is:
+## 3.1 Primary Users
 
-**Wedding → Events → Event Guests**
+The primary users are:
 
-A guest belongs to the wedding, while access to individual events is controlled through event-specific guest assignments.
+- Bride
+- Groom
+- Parents
+- Siblings
+- Close family members
+- Trusted friends helping organize the wedding
 
-Core relationships:
+These users will create accounts and access the wedding management dashboard.
 
-* User → Wedding
-* Wedding → Wedding Members
-* Wedding → Events
-* Wedding → Guests
-* Event ↔ Guest through EventGuest relationship
-* Wedding/Event → Tasks
-* Wedding/Event → Vendors
-* Wedding/Event → Expenses
-* Wedding/Event → Invitations
-* Event → RSVP
-* Wedding/Event → Accommodation and Transport
-* Wedding/Event → Documents, Live Stream, Photos, and Issues
+They will collectively be called:
 
-MongoDB should use a **hybrid document-modeling strategy**:
-
-* Embed data when it is tightly coupled and normally retrieved together.
-* Reference data when it is independently managed, frequently updated, shared across multiple entities, or potentially large.
-* Keep wedding-level tenant boundaries explicit through `weddingId`.
-* Use references for high-volume or independently managed entities such as guests, tasks, expenses, vendors, documents, and photos.
-* Embed small configuration objects where appropriate, such as wedding settings, notification preferences, or address information.
+**Wedding Members**
 
 ---
 
-# 8. Functional Requirements
+# 4. User Types
 
-## 8.1 Authentication
+There are only three user types in V1.
 
-* User registration and login.
-* Forgot-password and password-reset flow.
-* Optional social login such as Google.
-* Session management.
-* Secure logout.
-* User profile management.
+## 4.1 Admin
 
----
+Admin has access to the entire wedding workspace.
 
-## 8.2 Wedding Setup
+Admin can:
 
-* Create a wedding.
-* Enter couple names and wedding details.
-* Set wedding date, city, venue, and basic information.
-* Set initial budget.
-* Create default events or add custom events.
-* Invite family members and administrators.
-* Configure wedding privacy and access.
-* Store wedding-specific settings and configuration.
+- Manage wedding information
+- Create and manage events
+- Create and manage tasks
+- Manage guests
+- Send invitations
+- Track RSVP
+- Manage expenses
+- Manage vendors
+- Discover vendors
+- Manage wedding website
+- Manage gallery
+- Upload photos
+- Configure livestream
+- Manage Wedding Members
 
----
+The key difference between Admin and Manager is:
 
-## 8.3 Event Management
+> **Only Admin can manage other Wedding Members.**
 
-* Create, edit, reorder, archive, and view events.
-* Set event name, date, start/end time, venue, description, dress code, and notes.
-* Associate guests, tasks, vendors, expenses, invitations, RSVP, and live-stream information with an event.
-* Display events in timeline and calendar views.
+Multiple Admins should be supported.
 
-Example events:
+For example:
 
-* Engagement
-* Haldi
-* Mehendi
-* Sangeet
-* Wedding
-* Reception
-* Vidaai
+- Bride: Admin
+- Groom: Admin
 
 ---
 
-## 8.4 Event-Level Guest Management
+## 4.2 Manager
 
-This is a core product requirement.
+Managers are family members or trusted people helping organize the wedding.
 
-* Create and maintain a wedding guest directory.
-* Assign a guest to one or more events.
-* Allow different guest access for different events.
-* Track invitation and RSVP status per event.
-* Track event-specific check-in.
-* Store guest contact details and relevant notes.
-* Support household/family grouping where useful.
-* Ensure guest data remains associated with the correct wedding.
+Managers can access almost everything an Admin can.
+
+Managers cannot:
+
+- Add Wedding Members
+- Remove Wedding Members
+- Change another member's role
+
+Everything else remains accessible.
+
+---
+
+## 4.3 Guest
+
+Guests do not have accounts.
+
+Guests do not log in.
+
+Guests interact with Make My Marriage using secure unique links.
+
+A guest may:
+
+- Open their wedding invitation
+- View events they are invited to
+- RSVP
+- Specify how many people are attending
+- View wedding information
+- View the private wedding gallery
+- Upload wedding photos
+
+---
+
+# 5. Core Product Rules
+
+The following rules apply to V1.
+
+### Rule 1
+
+One user can belong to only **one wedding**.
+
+### Rule 2
+
+One wedding can have multiple Wedding Members.
+
+### Rule 3
+
+A wedding can have multiple Admins and Managers.
+
+### Rule 4
+
+Guests never require accounts.
+
+### Rule 5
+
+The `Wedding` is the primary workspace around which all other product data exists.
+
+### Rule 6
+
+All Admins and Managers can see the same wedding data.
+
+There are no private expenses, private tasks, or department-specific permissions.
+
+### Rule 7
+
+The product does not support professional wedding planners managing multiple weddings in V1.
+
+---
+
+# 6. Product Goals
+
+Make My Marriage V1 should allow a family to successfully manage the core activities of a wedding from beginning to end.
+
+The product should enable users to:
+
+1. Set up their wedding.
+2. Invite family members to help manage it.
+3. Plan multiple wedding events.
+4. Create and assign wedding tasks.
+5. Maintain a guest list.
+6. Send digital invitations.
+7. Collect RSVPs.
+8. Track wedding expenses.
+9. Maintain vendor information.
+10. Discover nearby vendors.
+11. Create a simple wedding website.
+12. Share wedding photos privately.
+13. Allow guests to contribute photos.
+14. Generate a QR code for photo sharing.
+15. Embed a YouTube wedding livestream.
+
+---
+
+# 7. Non-Goals
+
+The following functionality is explicitly outside V1.
+
+Make My Marriage V1 will NOT include:
+
+- Multiple weddings per user
+- Wedding planner business accounts
+- Complex role-based permissions
+- Guest accounts
+- Family household modelling
+- Individual tracking of every family member
+- Accommodation management
+- Hotel room allocation
+- Flight or train tracking
+- Airport pickup management
+- Vehicle management
+- Wedding budget planning
+- Budget allocation
+- Budget limits
+- Split expenses
+- Payment installment tracking
+- Vendor payment schedules
+- Vendor marketplace transactions
+- Vendor booking through Make My Marriage
+- Vendor payments
+- WhatsApp API integration
+- SMS integrations
+- Push notifications
+- In-app notification center
+- Real-time collaborative updates
+- Activity logs
+- Drag-and-drop website builder
+- Custom domains
+- Native livestreaming infrastructure
+- Advanced gallery permissions
+- AI functionality in initial V1
+
+These may become future releases.
+
+---
+
+# 8. Primary User Journey
+
+A typical Make My Marriage journey should look like this.
+
+### Step 1: Signup
+
+Bride or groom creates an account.
+
+### Step 2: Create Wedding
+
+User enters:
+
+- Bride name
+- Groom name
+- Wedding date
+- Wedding location
+- Wedding title
+- Optional wedding cover
+
+The creator automatically becomes Admin.
+
+### Step 3: Add Wedding Members
+
+Admin invites:
+
+- Bride
+- Groom
+- Parents
+- Siblings
+- Other family members
+
+Each invited person creates their own account.
+
+### Step 4: Add Events
+
+The family creates:
+
+- Engagement
+- Mehendi
+- Haldi
+- Sangeet
+- Cocktail
+- Wedding
+- Reception
+
+or custom events.
+
+### Step 5: Add Tasks
+
+Tasks are created and assigned to Wedding Members.
+
+### Step 6: Add Guests
+
+Guest information is imported or added manually.
+
+### Step 7: Send Invitations
+
+Unique invitation links are generated.
+
+Invitations are sent through email or manually shared through WhatsApp.
+
+### Step 8: Receive RSVPs
+
+Guests confirm attendance without logging in.
+
+### Step 9: Manage Vendors
+
+Wedding Members store booked vendors and discover nearby vendors.
+
+### Step 10: Track Expenses
+
+Wedding Members record expenses as money is spent.
+
+### Step 11: Publish Wedding Website
+
+The family chooses a theme and publishes a simple wedding website.
+
+### Step 12: Configure Livestream
+
+The family adds a YouTube Live URL.
+
+### Step 13: Share Wedding QR
+
+A QR code is generated and displayed during the wedding.
+
+Guests scan it to view or upload photos.
+
+### Step 14: Wedding Gallery
+
+Organisers and guests contribute photos to a shared private gallery.
+
+---
+
+# 9. Feature Requirements
+
+# 9.1 Authentication
+
+## Requirements
+
+Users should be able to:
+
+- Sign up
+- Log in
+- Log out
+- Reset forgotten passwords
+
+Signup requires:
+
+- Name
+- Email
+- Password
+
+Email addresses must be unique.
+
+Guests are excluded from authentication.
+
+---
+
+# 9.2 Wedding Creation
+
+After signing up, a user without an existing wedding should be prompted to create one.
+
+Required information:
+
+- Bride name
+- Groom name
+- Wedding date
+- Wedding city/location
+
+Optional:
+
+- Wedding title
+- Description
+- Cover image
 
 Example:
 
-Guest A may be invited to Sangeet, Wedding, and Reception but not Mehendi.
+**Akshay ❤️ Princi**
 
-The system must enforce this at the data and authorization level.
+14 February 2027  
+Dehradun, Uttarakhand
 
-MongoDB should store the guest's wedding association independently while maintaining event-specific access through an `eventGuests` collection or equivalent embedded relationship structure.
-
----
-
-# 8.5 Roles and Permissions
-
-Roles:
-
-* Couple
-* Wedding Admin
-* Family Member
-* Event Manager
-* Vendor
-* Guest
-
-Example permissions:
-
-* VIEW_WEDDING
-* EDIT_WEDDING
-* MANAGE_EVENTS
-* MANAGE_GUESTS
-* MANAGE_TASKS
-* MANAGE_EXPENSES
-* MANAGE_VENDORS
-* SEND_INVITATIONS
-* MANAGE_RSVP
-* MANAGE_DOCUMENTS
-* UPLOAD_PHOTOS
-* MANAGE_WEBSITE
-
-Frontend permission checks are for user experience only.
-
-Backend authorization must enforce access control.
-
-MongoDB queries must always enforce the appropriate `weddingId`, user membership, role, permission, and event-level access constraints.
+The person creating the wedding becomes its first Admin.
 
 ---
 
-# 8.6 Wedding Dashboard
+# 9.3 Wedding Dashboard
 
-Display:
+The dashboard serves as the wedding command center.
 
-* Couple names and wedding date.
-* Countdown in days/hours.
-* Next upcoming event.
-* Current wedding progress.
-* Upcoming events.
-* Today's priorities.
-* Task statistics.
-* Guest and RSVP statistics.
-* Expense and budget summary.
-* Vendor summary.
-* Quick actions.
+It should display important information without requiring users to navigate through every module.
 
-Dashboard statistics should be generated from the underlying MongoDB collections using efficient queries and aggregation pipelines.
+## Summary Information
 
----
+Potential dashboard cards:
 
-# 8.7 Task Planner
-
-* Create, edit, assign, prioritize, and complete tasks.
-* Associate tasks with the wedding or a specific event.
-* Assign tasks to wedding members.
-* Set due dates and priorities.
-* Support attachments and notes.
-* Statuses:
-
-  * To Do
-  * In Progress
-  * Blocked
-  * Completed
-* Views:
-
-  * List
-  * Kanban
-  * Calendar
-
-Tasks should contain a `weddingId` to maintain tenant isolation and may optionally contain an `eventId`.
-
----
-
-# 8.8 Expense and Budget Management
-
-* Set total wedding budget.
-* Track planned and actual expenses.
-* Categorize expenses.
-* Associate expenses with events and vendors.
-* Track payment status and due dates.
-* Upload receipts.
-* Track payment method and notes.
-* Show:
-
-  * Budget
-  * Spent
-  * Remaining
-  * Pending amounts
-
-Expenses should be stored independently so that financial records can scale without making the main wedding document excessively large.
-
----
-
-# 8.9 Vendor Management
-
-* Create vendor profiles.
-* Store category, contact information, contract details, and notes.
-* Associate vendors with one or multiple events.
-* Track quoted amount, agreed amount, paid amount, and pending amount.
-* Attach contracts and invoices.
-* Link vendor expenses to the expense tracker.
-
-Vendor-event relationships should be represented using references rather than duplicating complete vendor objects inside multiple events.
-
----
-
-# 8.10 Digital Invitations
-
-* Select an invitation template.
-* Customize wedding information.
-* Select applicable events.
-* Select guests.
-* Generate a unique invitation link.
-* Share the invitation.
-* Connect invitation data to RSVP.
-
-Invitation information may include:
-
-* Couple names
-* Dates
-* Venues
-* Map location
-* Dress code
-* Event schedule
-* RSVP link
-* Wedding website
-* Relevant instructions
-
----
-
-# 8.11 RSVP Management
-
-* Event-specific RSVP.
-* Accept, decline, or pending status.
-* Number of attendees.
-* Accommodation requirement.
-* Transportation requirement.
-* Optional food preference.
-* Dashboard showing:
-
-  * Invited
-  * Confirmed
-  * Declined
-  * Pending guests
-
-RSVP records must contain both `weddingId` and `eventId` so that event-specific access and reporting remain efficient.
-
----
-
-# 8.12 Notifications and Reminders
-
-Support:
-
-* Wedding-level reminders.
-* Event reminders.
-* RSVP reminders.
-* Task due reminders.
-* Vendor payment reminders.
-* Accommodation reminders.
-* Transport reminders.
-
-Initial channels:
-
-* In-app
-* Email
-
-Future channels:
-
-* SMS
-* WhatsApp integrations
-
-Example reminder schedule:
-
-* 50 days
-* 30 days
-* 7 days
-* 3 days
-* 1 day
-
-The exact schedule should be configurable.
-
-Reminder and notification records should be stored separately from core wedding documents to support scalable processing and future background jobs.
-
----
-
-# 8.13 Wedding Website
-
-* Generate a public or private wedding website.
-* Reuse wedding, event, venue, and schedule information already entered into the platform.
-* Display couple information, event schedule, venues, RSVP, map, dress code, and selected photos.
-* Avoid duplicate data entry.
-* Allow the couple to control which information is public.
-
-Website configuration can be stored as part of the wedding configuration or as a separate `weddingWebsites` collection if the website becomes more complex.
-
----
-
-# 8.14 Accommodation Management
-
-* Track guests requiring accommodation.
-* Track hotels and rooms.
-* Assign guests to rooms.
-* Track check-in and check-out dates.
-* Track accommodation payments.
-* Link accommodation with transport.
-
-Accommodation entities should be independently stored because rooms, bookings, and assignments may change frequently.
-
----
-
-# 8.15 Transportation Management
-
-* Create pickup and drop schedules.
-* Assign guests.
-* Store vehicle and driver information.
-* Track date and time.
-* Track transportation status.
-* Associate transport with events and accommodation.
-
----
-
-# 8.16 Documents
-
-* Upload and manage marriage-related documents, contracts, invoices, receipts, and travel/accommodation documents.
-* Organize documents by category and event.
-* Apply role-based access.
-* Support preview, download, and deletion according to permissions.
-* Provide a marriage-registration checklist.
-
-The product should provide organization and official-process references where appropriate, but should not claim to replace government registration portals or legal services.
-
-Actual file contents should be stored in object storage rather than MongoDB.
-
-MongoDB should store metadata such as:
-
-* `weddingId`
-* `eventId`
-* `uploadedBy`
-* `fileName`
-* `fileType`
-* `storageKey`
-* `fileSize`
-* `category`
-* `visibility`
-* `createdAt`
-
----
-
-# 8.17 Wedding Day Mode
-
-* Show the current event and timeline.
-* Display critical tasks.
-* Show assigned people and vendors.
-* Display emergency contacts.
-* Highlight overdue or blocked items.
-* Provide quick access to venue, transport, and schedule information.
-
-Wedding Day Mode should prioritize mobile performance because users may access it primarily from phones during wedding events.
-
----
-
-# 8.18 QR Guest Check-In
-
-* Generate or support guest-specific/event-specific QR codes.
-* Scan QR code at an event.
-* Verify event access.
-* Record check-in time.
-* Display invited, confirmed, and checked-in counts.
-
-Check-in records should be event-specific and should reference the guest and wedding.
-
----
-
-# 8.19 Live Streaming
-
-* Store an external streaming URL for an event.
-* Restrict stream access according to event permissions.
-* Show stream information on the relevant event page.
-* Use a third-party streaming provider rather than building proprietary streaming infrastructure.
-
----
-
-# 8.20 Memories and Photo Gallery
-
-* Create albums by event.
-* Upload and view photographs.
-* Allow private or public albums.
-* Support guest photo uploads with moderation.
-* Allow event tagging.
-* Support download and sharing based on permissions.
-* Optional QR-based photo upload for guests.
-
-Photos and videos should be stored in object storage.
-
-MongoDB should store metadata and relationships such as:
-
-* Album
-* Wedding
-* Event
-* Uploaded By
-* Storage Key
-* Visibility
-* Tags
-* Upload Date
-
----
-
-# 8.21 Wedding Issues / Chaos Management
-
-* Create an issue.
-* Associate it with an event.
-* Set priority.
-* Assign an owner.
-* Add description, notes, and attachments.
-* Statuses:
-
-  * Open
-  * Assigned
-  * In Progress
-  * Resolved
-
-This module provides a lightweight incident-management layer for real wedding-day problems.
-
----
-
-# 8.22 Seating Planner
-
-* Create tables or seating groups.
-* Assign guests.
-* View seating layout.
-* Track special seating requirements.
-
-Treat as a post-MVP feature.
-
----
-
-# 8.23 Final Wedding Analytics
-
-Display:
-
-* Number of events.
-* Guest invitation and RSVP statistics.
-* Check-in statistics.
-* Task completion.
-* Vendor count.
-* Expense and budget summary.
-* Accommodation statistics.
-* Transportation statistics.
-* Photo and memory statistics.
-
-MongoDB aggregation pipelines can be used to generate these reports from multiple collections.
-
----
-
-# 9. Main Navigation
-
-* Dashboard
-* Events
-* Guests
-* Tasks
-* Expenses
-* Vendors
-* Invitations
-* Accommodation
-* Transport
-* Documents
-* Wedding Website
-* Memories
-* Settings
-* Wedding Day Mode
-
----
-
-# 10. Recommended Technology Stack
-
-## Frontend
-
-* Next.js
-* React
-* TypeScript
-* Tailwind CSS
-
-## Forms and Validation
-
-* React Hook Form
-* Zod
-
-## Server State
-
-* TanStack Query
-
-## Client/UI State
-
-* Zustand where required
-
-## Backend
-
-* Node.js
-* Express.js
-* TypeScript
-
-## Database
-
-* MongoDB
-* MongoDB Atlas for managed production hosting
-* Mongoose or the official MongoDB Node.js driver
-
-For this project, Mongoose can be used initially to provide schemas, validation, relationships/references, indexes, and developer-friendly data access while still retaining MongoDB's document-oriented model.
-
-## File Storage
-
-Object storage for:
-
-* Photos
-* Documents
-* Receipts
-* Contracts
-* Invoices
-* Other media
-
-MongoDB should store metadata and storage references rather than large binary files for the core implementation.
-
-## Authentication
-
-* Secure session/token-based authentication
-* HTTP-only cookies where appropriate
-* Password hashing
-* Role and permission-based authorization
-
-## CI/CD
-
-* GitHub Actions
-
-## Streaming
-
-* External streaming provider
-
-## Maps
-
-* External maps provider
-
-## Email
-
-* Transactional email provider
-
----
-
-# 11. MongoDB Data Model
-
-The application should use a **document-oriented data model with references for independently managed entities**.
-
-Core collections:
-
-* `users`
-* `weddings`
-* `weddingMembers`
-* `roles`
-* `permissions`
-* `events`
-* `guests`
-* `eventGuests`
-* `tasks`
-* `vendors`
-* `eventVendors`
-* `expenses`
-* `payments`
-* `invitations`
-* `rsvps`
-* `reminders`
-* `notifications`
-* `venues`
-* `accommodations`
-* `rooms`
-* `transport`
-* `documents`
-* `photos`
-* `albums`
-* `liveStreams`
-* `issues`
-
-### Example Wedding Document
-
-A wedding document may contain:
-
-* Couple information
-* Wedding date
-* Primary location
-* Budget configuration
-* Wedding settings
-* Privacy settings
-* Website configuration
-* Created/updated metadata
-
-Large or independently changing data should not be embedded directly into the wedding document.
-
-For example, guests, expenses, tasks, documents, and photos should remain separate collections.
-
-### Example Event Document
-
-An event may contain:
-
-* `weddingId`
-* Name
-* Date
-* Start time
-* End time
-* Venue reference
-* Description
-* Dress code
-* Notes
-* Display order
-* Status
-* Created/updated metadata
-
-### Example Guest Document
-
-A guest may contain:
-
-* `weddingId`
-* Name
-* Phone
-* Email
-* Address
-* Household/family reference
-* Guest category
-* Notes
-* Created/updated metadata
-
-### Example EventGuest Document
-
-This collection represents event-level guest access.
-
-It may contain:
-
-* `weddingId`
-* `eventId`
-* `guestId`
-* Invitation status
-* RSVP status
-* Number of attendees
-* Accommodation requirement
-* Transportation requirement
-* Check-in status
-* Check-in timestamp
-* Guest-specific notes
-
-This model is important because it prevents event access from being inferred simply from membership in the wedding.
-
----
-
-# 12. MongoDB Data Modeling Principles
-
-The MongoDB implementation should follow these principles:
-
-## 12.1 Tenant Isolation
-
-Every wedding-owned document should contain a `weddingId`.
+- Number of events
+- Tasks completed / total tasks
+- Total guests
+- RSVP responses
+- Total expenses
+- Number of vendors
 
 Example:
 
+**42 Days to Go**
+
+Events: 6  
+Tasks: 32 / 48 completed  
+Guests: 186  
+RSVPs: 132  
+Expenses: ₹12,45,000  
+Vendors: 8
+
+## Dashboard Sections
+
+### Upcoming Events
+
+Display nearest upcoming wedding events.
+
+### Upcoming Tasks
+
+Display incomplete tasks approaching their due dates.
+
+### Wedding Countdown
+
+Show days remaining until the primary wedding date.
+
+The dashboard should remain primarily informational.
+
+No advanced analytics are required.
+
+---
+
+# 9.4 Wedding Member Management
+
+Admin should be able to access:
+
+**Settings → Wedding Members**
+
+Admin can:
+
+- Invite member
+- View members
+- Remove member
+- Change role
+
+Possible roles:
+
+- Admin
+- Manager
+
+An invitation should be sent through email.
+
+The invited user creates an account and joins the existing wedding.
+
+Managers cannot access Wedding Member administration.
+
+---
+
+# 9.5 Wedding Events
+
+Wedding Members can create multiple events.
+
+## Event Fields
+
+Each event should support:
+
+- Event name
+- Date
+- Start time
+- End time
+- Venue name
+- Address
+- Description
+- Dress code
+- Cover image
+
+## Suggested Event Types
+
+The UI may provide shortcuts for:
+
+- Roka
+- Engagement
+- Mehendi
+- Haldi
+- Sangeet
+- Cocktail
+- Wedding
+- Reception
+
+Users must also be able to create:
+
+**Custom Event**
+
+Events should be editable and deletable.
+
+---
+
+# 9.6 Task Management
+
+Wedding Members can create and manage tasks.
+
+## Task Fields
+
+- Title
+- Description
+- Assigned Wedding Member
+- Related Event
+- Due date
+- Priority
+- Status
+
+## Status
+
+- To Do
+- In Progress
+- Completed
+
+## Priority
+
+- Low
+- Medium
+- High
+
+## Task Views
+
+Users should be able to view:
+
+- All Tasks
+- My Tasks
+- Completed Tasks
+
+Useful filtering:
+
+- Status
+- Event
+- Assigned member
+- Priority
+
+Tasks do not require comments, attachments, subtasks, dependencies, or complex project management functionality in V1.
+
+---
+
+# 9.7 Guest Management
+
+Wedding Members can maintain the wedding guest list.
+
+## Guest Fields
+
+- Name
+- Email
+- Phone number
+- Maximum guests allowed
+- Events invited to
+- RSVP status
+- Number attending
+- Notes
+
+Phone number can be optional for V1 because automated WhatsApp/SMS communication is not currently supported.
+
+## RSVP Status
+
+- Pending
+- Attending
+- Not Attending
+
+A guest represents one invitation rather than every individual family member.
+
+Example:
+
+**Rajesh Sharma**
+
+Maximum guests allowed: 4
+
+Rajesh may respond:
+
+**Attending with 3 people**
+
+The other three family members do not require separate records.
+
+---
+
+# 9.8 Event-Level Invitations
+
+A guest may be invited to only selected wedding events.
+
+Example:
+
+Rajesh Sharma:
+
+- Mehendi: No
+- Haldi: No
+- Cocktail: Yes
+- Wedding: Yes
+- Reception: Yes
+
+The invitation page should only display events that the particular guest is invited to.
+
+---
+
+# 9.9 Invitation Links
+
+Every guest should receive a secure unique invitation link.
+
+Example:
+
+`makemymarriage.com/invite/X7K29P`
+
+The link should identify:
+
+- Wedding
+- Guest
+- Events guest is invited to
+
+Guests should not be required to log in.
+
+Links should use sufficiently unpredictable tokens so guests cannot easily guess another person's invitation URL.
+
+---
+
+# 9.10 Digital Invitation
+
+The invitation experience should display:
+
+- Couple names
+- Wedding branding
+- Welcome message
+- Invited events
+- Event dates
+- Event times
+- Venues
+- RSVP form
+
+Example:
+
+**Akshay & Princi**
+
+would love for you to celebrate their wedding with them.
+
+### Wedding
+
+14 February 2027  
+8:00 PM  
+XYZ Resort, Dehradun
+
+---
+
+# 9.11 RSVP
+
+Guest should be able to respond from the invitation page.
+
+Questions:
+
+### Will you be attending?
+
+- Yes
+- No
+
+If yes:
+
+### How many people will attend?
+
+Maximum should be limited to the number specified by the organiser.
+
+Example:
+
+Allowed guests: 4
+
+Guest can choose:
+
+1  
+2  
+3  
+4
+
+Guest cannot choose 5.
+
+The RSVP may be edited later using the same invitation link.
+
+No account should be required.
+
+---
+
+# 9.12 Email Invitations
+
+Wedding Members should be able to send wedding invitations via email.
+
+The email should contain:
+
+- Couple names
+- Short invitation message
+- Wedding date
+- Link to invitation
+
+The system should record whether an invitation has been sent.
+
+Wedding Members should also be able to resend invitations.
+
+---
+
+# 9.13 RSVP Email Reminders
+
+Wedding Members should be able to identify guests whose RSVP status is still Pending.
+
+The system should provide an option such as:
+
+**Send Reminder**
+
+or:
+
+**Send Reminder to Pending Guests**
+
+The reminder is sent through email.
+
+Automated scheduled reminder workflows are not necessary for the first implementation.
+
+---
+
+# 9.14 WhatsApp Sharing
+
+The product should provide a:
+
+**Share on WhatsApp**
+
+button.
+
+The button opens WhatsApp with a pre-filled message containing the guest's invitation URL.
+
+No WhatsApp API integration is required.
+
+Make My Marriage does not automatically send WhatsApp messages in V1.
+
+---
+
+# 9.15 Expense Tracker
+
+The Expense Tracker records money already spent or committed for the wedding.
+
+It is not a budgeting system.
+
+## Expense Fields
+
+- Expense title
+- Amount
+- Date
+- Category
+- Related Event
+- Related Vendor
+- Notes
+
+Related Event and Related Vendor may be optional.
+
+## Suggested Categories
+
+- Venue
+- Catering
+- Photography
+- Videography
+- Decoration
+- Clothing
+- Jewellery
+- Entertainment
+- Invitations
+- Gifts
+- Travel
+- Makeup
+- Miscellaneous
+
+Wedding Members can:
+
+- Add expenses
+- Edit expenses
+- Delete expenses
+- View all expenses
+- Filter expenses
+
+## Expense Overview
+
+Display:
+
+**Total Wedding Expense**
+
+Example:
+
+₹17,42,500
+
+Optional visual breakdown:
+
+Venue: ₹6,00,000  
+Catering: ₹4,20,000  
+Photography: ₹1,80,000
+
+No budget or variance calculations should exist.
+
+---
+
+# 9.16 My Vendors
+
+Wedding Members can maintain a list of vendors selected for the wedding.
+
+## Vendor Fields
+
+- Vendor name
+- Category
+- Contact person
+- Phone number
+- Email
+- Address
+- Website
+- Total agreed cost
+- Related Events
+- Notes
+
+## Vendor Categories
+
+Examples:
+
+- Photographer
+- Videographer
+- Venue
+- Caterer
+- Decorator
+- DJ
+- Makeup Artist
+- Mehendi Artist
+- Pandit
+- Choreographer
+- Florist
+- Wedding Planner
+- Transport
+- Other
+
+No vendor payment schedule is required.
+
+---
+
+# 9.17 Vendor Discovery
+
+Wedding Members should be able to discover local vendors.
+
+Example:
+
+**Wedding Photographers near Dehradun**
+
+Potential categories:
+
+- Photographers
+- Wedding venues
+- Caterers
+- Makeup artists
+- Florists
+- Decorators
+- DJs
+
+A third-party local business API can power the results.
+
+Potential data displayed:
+
+- Vendor name
+- Rating
+- Address
+- Distance where available
+- Contact information where available
+
+Users should be able to take a discovered vendor and add it to:
+
+**My Vendors**
+
+Make My Marriage itself does not process vendor bookings or payments.
+
+---
+
+# 9.18 Wedding Website
+
+Each wedding should have a hosted wedding website.
+
+Example:
+
+`makemymarriage.com/w/akshay-princi`
+
+The wedding website is different from the private guest invitation.
+
+It contains general wedding information.
+
+## Website Sections
+
+### Hero
+
+- Couple names
+- Wedding date
+- Cover photo
+
+### Welcome
+
+- Short message
+- Optional description
+
+### Events
+
+- Event name
+- Date
+- Time
+- Venue
+- Dress code
+- Map link
+
+### Gallery
+
+Display wedding photos if gallery sharing is enabled.
+
+### Livestream
+
+Display YouTube livestream if configured.
+
+---
+
+# 9.19 Wedding Website Themes
+
+Users should not manually design their website.
+
+Instead they select from approximately three predefined themes.
+
+Example themes:
+
+### Classic Indian
+
+Traditional, decorative wedding aesthetic.
+
+### Minimal Elegant
+
+Clean typography and elegant layout.
+
+### Modern Celebration
+
+Contemporary, colourful design.
+
+All themes use the same underlying wedding information.
+
+Changing the theme should change presentation rather than content.
+
+---
+
+# 9.20 Wedding Photo Gallery
+
+Each wedding has a private gallery.
+
+The gallery should not be publicly searchable.
+
+Wedding Members can:
+
+- Upload photos
+- View photos
+- Delete photos
+- Share gallery link
+- Download photos
+
+Guests with the gallery link can:
+
+- View photos
+- Upload photos
+
+Guest deletion permissions are not required.
+
+---
+
+# 9.21 Gallery Albums
+
+Photos should optionally be grouped by wedding event.
+
+Example:
+
+- Mehendi
+- Haldi
+- Sangeet
+- Wedding
+- Reception
+
+When uploading photos, organisers or guests may select the associated event.
+
+An additional general category can exist:
+
+**Other / Wedding Memories**
+
+---
+
+# 9.22 Guest Photo Upload
+
+Guests should be able to upload wedding photos without authentication.
+
+The upload experience should be designed primarily for mobile devices.
+
+Flow:
+
+1. Guest opens gallery/upload link.
+2. Guest selects photos from phone.
+3. Guest optionally chooses event.
+4. Guest uploads photos.
+5. Photos appear in the wedding gallery.
+
+Because uploads happen without authentication, appropriate technical safeguards such as file type validation, size restrictions, upload limits, and secure upload URLs should be implemented during technical design.
+
+---
+
+# 9.23 Wedding QR Code
+
+Each wedding should have a QR code that opens the guest gallery/upload experience.
+
+Example printed message:
+
+**Share the Memories 📸**
+
+Scan to upload and view photos from Akshay & Princi's wedding.
+
+Wedding Members should be able to:
+
+- View QR code
+- Download QR code
+- Print/share QR code
+
+The QR code should use a stable URL so previously printed QR codes continue working.
+
+---
+
+# 9.24 YouTube Livestream
+
+Wedding Members should be able to configure a YouTube livestream.
+
+They provide:
+
+- YouTube Live URL
+
+The wedding website displays the embedded player when configured.
+
+No video streaming infrastructure should be built by Make My Marriage.
+
+Wedding Members should be able to:
+
+- Add livestream
+- Update livestream URL
+- Remove livestream
+
+---
+
+# 9.25 Settings
+
+Settings should include several simple sections.
+
+## Wedding Details
+
+Edit:
+
+- Bride name
+- Groom name
+- Wedding date
+- Location
+- Cover image
+- Description
+
+## Wedding Members
+
+Admin only.
+
+Manage:
+
+- Admins
+- Managers
+
+## Website
+
+Configure:
+
+- Theme
+- Content
+- Publish status
+
+## Gallery
+
+Manage:
+
+- Gallery visibility
+- Guest upload availability
+
+## Livestream
+
+Manage:
+
+- YouTube Live URL
+
+---
+
+# 10. Main Application Navigation
+
+Suggested dashboard navigation:
+
+**Dashboard**
+
+**Events**
+
+**Tasks**
+
+**Guests**
+- Guest List
+- Invitations
+- RSVP
+
+**Expenses**
+
+**Vendors**
+- My Vendors
+- Discover Vendors
+
+**Wedding Website**
+
+**Photos**
+- Gallery
+- Guest Upload
+- QR Code
+
+**Live Stream**
+
+**Settings**
+- Wedding Details
+- Wedding Members
+
+Navigation can be simplified later during UI design.
+
+---
+
+# 11. Important Product Relationships
+
+At the product level, the major relationships are:
+
 ```text
-weddingId
-eventId
-guestId
-createdBy
-updatedBy
-createdAt
-updatedAt
+User
+  |
+Wedding Membership
+  |
+Wedding
+  |
+  +-- Wedding Members
+  |
+  +-- Events
+  |     |
+  |     +-- Tasks
+  |     +-- Guests
+  |     +-- Vendors
+  |     +-- Expenses
+  |     +-- Photos
+  |
+  +-- Tasks
+  |
+  +-- Guests
+  |     |
+  |     +-- Invitations
+  |     +-- RSVP
+  |
+  +-- Vendors
+  |
+  +-- Expenses
+  |
+  +-- Wedding Website
+  |
+  +-- Gallery
+  |     |
+  |     +-- Photos
+  |
+  +-- Livestream
 ```
 
-This allows backend services to consistently enforce wedding-level authorization.
-
-## 12.2 Reference Large or Independent Entities
-
-Use references for entities such as:
-
-* Guests
-* Vendors
-* Tasks
-* Expenses
-* Documents
-* Photos
-* Payments
-
-These entities may grow independently and should not cause the main wedding document to become excessively large.
-
-## 12.3 Embed Small, Tightly Coupled Data
-
-Embedding is appropriate for small configuration objects such as:
-
-* Wedding settings
-* Privacy settings
-* Notification preferences
-* Address details
-* Website configuration
-* Vendor contact information where appropriate
-
-## 12.4 Avoid Unbounded Arrays
-
-Avoid continuously growing arrays such as:
-
-```text
-wedding.guests[]
-wedding.expenses[]
-wedding.photos[]
-```
-
-because a wedding can potentially contain thousands of records.
-
-Instead, store these entities in separate collections.
-
-## 12.5 Indexing
-
-Important indexes should include combinations such as:
-
-```text
-weddingId
-weddingId + eventId
-weddingId + guestId
-weddingId + status
-weddingId + dueDate
-weddingId + createdAt
-eventId + guestId
-```
-
-Additional indexes should be introduced based on actual query patterns.
-
-## 12.6 Aggregation
-
-MongoDB aggregation pipelines should be used for:
-
-* Dashboard statistics
-* RSVP summaries
-* Guest counts
-* Expense summaries
-* Budget calculations
-* Event check-in statistics
-* Task completion statistics
-* Final wedding analytics
+Exact database modelling will be decided during database design.
 
 ---
 
-# 13. Key Business Rules
+# 12. Important UX Principles
 
-* A guest belongs to a wedding but event access is controlled through EventGuest.
-* A guest may be invited to multiple events.
-* RSVP status is event-specific.
-* Check-in is event-specific.
-* A vendor may be associated with multiple events.
-* Tasks may belong to the wedding or a specific event.
-* Expenses may belong to the wedding or a specific event.
-* Private documents require explicit authorization.
-* Backend authorization must enforce all sensitive access rules.
-* Deleting an event must not automatically delete a shared guest record.
-* Wedding website content should reuse existing wedding data wherever possible.
-* Guest-facing views should expose only the events and information the guest is authorized to see.
-* Every wedding-owned document must be associated with a `weddingId`.
-* Cross-wedding access must be rejected by backend authorization.
-* Large, independently changing datasets should not be embedded into the primary wedding document.
-* Important references should use MongoDB `ObjectId` values.
-* Frequently queried fields should be indexed.
-* File binaries should be stored outside MongoDB in object storage for the initial implementation.
-* Soft deletion should be considered for important business records such as guests, vendors, documents, and expenses where historical traceability is important.
+## 12.1 Wedding First
 
----
+Every logged-in page should clearly feel connected to the current wedding.
 
-# 14. Non-Functional Requirements
+The user should see the couple identity or wedding identity consistently.
 
-* Responsive design across desktop, tablet, and mobile.
-* Wedding-day workflows should be usable on mobile devices.
-* Fast initial load and efficient navigation.
-* Server-side pagination for large guest and transaction lists.
-* Secure authentication and authorization.
-* Input validation on both frontend and backend.
-* Secure file upload and access control.
-* Protection against common web vulnerabilities.
-* Accessible UI following practical WCAG principles.
-* Reliable error handling and user feedback.
-* Auditability for important administrative actions.
-* Appropriate MongoDB indexes for frequently accessed queries.
-* Efficient aggregation pipelines for dashboard and reporting queries.
-* Database backups and recovery strategy.
-* Monitoring of application and database performance.
-* Avoid unbounded MongoDB documents and arrays.
-* Maintain clear tenant isolation using `weddingId`.
+## 12.2 Simple Enough for Parents
 
----
+The dashboard should not feel like enterprise project-management software.
 
-# 15. MVP Scope
+A parent who is not technically sophisticated should still be comfortable:
 
-The MVP should focus on the core wedding management system rather than attempting to launch every feature simultaneously.
+- Adding a guest
+- Completing a task
+- Recording an expense
+- Viewing an RSVP
 
-* Authentication
-* Wedding setup
-* Multiple events
-* Event-level guest management
-* Roles and permissions
-* Wedding dashboard
-* Task planner
-* Expense tracker
-* Vendor management
+## 12.3 Mobile Friendly
 
----
+Although Wedding Members may use desktop dashboards, many workflows will happen from mobile devices.
 
-# 16. V2 Scope
+Guest experiences especially must be mobile-first.
 
-* Digital invitations
-* RSVP
-* Notifications and reminders
-* Wedding website
-* Accommodation
-* Transportation
-* Documents and marriage checklist
+Important mobile workflows:
+
+- RSVP
+- Invitation viewing
+- Photo upload
+- Gallery browsing
+- WhatsApp sharing
+
+## 12.4 Minimal Guest Friction
+
+Guests should never be asked to:
+
+- Create account
+- Set password
+- Install app
+
+Invitation link → RSVP.
+
+QR scan → Gallery.
+
+That should be the philosophy.
+
+## 12.5 Indian Context
+
+The application should feel designed for Indian weddings rather than being a generic event management platform.
+
+Examples:
+
+- Mehendi
+- Haldi
+- Sangeet
+- Roka
+- Multiple events
+- Family organisers
+- WhatsApp sharing
+- INR formatting
+- Large guest counts
 
 ---
 
-# 17. V3 Scope
+# 13. Privacy and Security Expectations
 
-* Wedding Day Mode
-* QR guest check-in
-* Live streaming
-* Photo gallery
-* QR guest photo uploads
-* Seating planner
-* Wedding issues/chaos management
-* Final wedding analytics
+Although detailed security architecture belongs in system design, the product requires the following behaviour.
 
----
+### Authenticated Data
 
-# 18. Suggested End-to-End User Flow
+Wedding management data should only be accessible by Wedding Members.
 
-* Landing Page
-* Login / Signup
-* Create Wedding
-* Wedding Setup Wizard
-* Invite Wedding Members
-* Create Events
-* Add Guests
-* Assign Event Access
-* Assign Roles and Permissions
-* Open Wedding Dashboard
-* Create Tasks
-* Add Vendors
-* Add Expenses
-* Create Invitations
-* Collect RSVPs
-* Manage Accommodation and Transport
-* Publish Wedding Website
-* Use Wedding Day Mode
-* Check In Guests
-* Share Live Stream
-* Collect Photos
-* Complete Documents
-* Review Final Wedding Analytics
+### Guest Invitation Links
+
+Invitation tokens should be difficult to guess.
+
+### Gallery Links
+
+Private galleries should not be publicly indexed or discoverable.
+
+### Photo Upload
+
+Guest uploads must be securely handled and validated.
+
+### Cross-Wedding Isolation
+
+A user belonging to one wedding must never be able to access another wedding's internal data.
+
+This becomes a critical backend requirement even though each user only participates in one wedding in V1.
 
 ---
 
-# 19. Connected Product Flows
+# 14. Error and Edge Cases
 
-The product should behave as one connected system rather than a collection of unrelated CRUD screens.
+The product should account for situations such as:
 
-### Guest Journey
+### Wedding Member
 
-**Guest → Event → Invitation → RSVP → Accommodation → Transport → Check-In**
+- Invited email already has an account.
+- Invitation expires.
+- Admin removes a Manager.
+- Multiple Admins exist.
+- Admin attempts to remove the final Admin.
 
-### Wedding Execution
+The system should never allow a wedding to have zero Admins.
 
-**Event → Tasks → Vendors → Expenses → Payments → Wedding Day**
+### Guests
 
-### Wedding Content
+- Guest opens expired/invalid link.
+- Guest submits RSVP twice.
+- Guest changes their RSVP.
+- Guest tries to RSVP for more people than allowed.
+- Guest has no email address.
 
-**Wedding → Events → Website → Invitations → Live Stream → Memories**
+Guests without email can still have a link manually shared through WhatsApp.
 
-MongoDB collections should support these flows through references and carefully designed queries rather than duplicating the same data across multiple documents.
+### Events
 
----
+- Event occurs after primary wedding date.
+- Event has no venue.
+- Event is deleted after guests were invited.
 
-# 20. Success Metrics
+The UI should warn the organiser before destructive actions that affect invitations.
 
-* Number of weddings created.
-* Percentage of created weddings with multiple events.
-* Number of guests added per wedding.
-* Percentage of guests assigned to at least one event.
-* Number of invitations sent.
-* RSVP completion rate.
-* Task completion rate.
-* Expense records created.
-* Budget tracking adoption.
-* Number of active wedding administrators.
-* Wedding website visits.
-* Event check-ins.
-* Photo uploads.
-* Percentage of weddings completing the core lifecycle from setup to event execution.
+### Vendors
 
----
+- Vendor exists without an expense.
+- Expense exists without a vendor.
 
-# 21. MVP Acceptance Criteria
+Both should be valid.
 
-* A user can create an account and log in.
-* A user can create a wedding.
-* A wedding can contain multiple events.
-* A user can create and manage guests.
-* A guest can be assigned to specific events.
-* Different wedding members can receive different permissions.
-* Authorized users can create and assign tasks.
-* Authorized users can manage vendors.
-* Authorized users can record and track expenses.
-* The dashboard reflects data from the connected modules.
-* A second user with restricted permissions cannot access unauthorized wedding information.
-* A guest cannot access an event unless an appropriate event-level relationship exists.
-* Cross-wedding data access is prevented by backend authorization.
-* The application works responsively on desktop and mobile.
-* MongoDB queries use appropriate indexes for primary list and dashboard operations.
-* Large guest, task, vendor, and expense lists support pagination.
+### Gallery
+
+- Guest uploads unsupported file.
+- Upload fails midway.
+- File exceeds maximum size.
+- Guest scans QR after wedding.
+
+The gallery should continue functioning after the wedding unless disabled.
 
 ---
 
-# 22. Portfolio / Technical Positioning
+# 15. Suggested V1 Success Metrics
 
-My Marriage can be presented as a **multi-tenant wedding management platform designed around the complexity of Indian weddings**.
+Since this is intended to become a real product, some basic product metrics should eventually be tracked.
 
-The strongest technical story is not the number of screens but the connected data and authorization model.
+## Activation
 
-Key technical highlights:
+Percentage of users who:
 
-* Multi-tenant wedding architecture.
-* MongoDB document-oriented data modeling.
-* Wedding-level tenant isolation using `weddingId`.
-* Role-based access control.
-* Event-level guest authorization.
-* Reference-based modeling for independently managed entities.
-* Embedded modeling for tightly coupled configuration data.
-* Server-side pagination and filtering for large datasets.
-* MongoDB indexes designed around application query patterns.
-* Aggregation pipelines for dashboards and analytics.
-* Responsive and mobile-first wedding-day workflows.
-* Secure document and media access.
-* Connected invitation, RSVP, guest, event, and dashboard workflows.
-* CI/CD and production-oriented engineering practices.
+1. Sign up
+2. Create wedding
+3. Create first event
 
----
+## Wedding Setup Completion
 
-# 23. Recommended Demo Scenario
+Percentage of weddings that have:
 
-Create a sample wedding with:
+- At least one event
+- At least one task
+- At least one guest
 
-* Engagement
-* Mehendi
-* Sangeet
-* Wedding
-* Reception
+## Collaboration
 
-Then:
+Average number of Wedding Members per wedding.
 
-1. Add a group of guests.
-2. Give different guests access to different events.
-3. Create Couple, Family Member, Event Manager, Vendor, and Guest accounts.
-4. Log in as a guest and demonstrate that only authorized events are visible.
-5. Send an invitation.
-6. Submit an event-specific RSVP.
-7. Add a vendor.
-8. Add an expense.
-9. Show the budget and dashboard updating.
-10. Create and complete a task.
-11. Demonstrate permission restrictions using different users.
-12. Switch to Wedding Day Mode.
-13. Demonstrate event-specific execution.
-14. Demonstrate QR check-in when the feature is implemented.
-15. Show how the same event and wedding data can power the wedding website.
+## Invitations
+
+- Invitations created
+- Invitations sent
+- Invitation open rate
+- RSVP response rate
+
+## Task Management
+
+Percentage of wedding tasks completed.
+
+## Vendor Usage
+
+- Vendors added
+- Vendor discovery searches
+
+## Gallery Engagement
+
+- Photos uploaded
+- Guest uploads
+- Gallery visitors
+- QR visits
+
+These metrics do not necessarily need to appear inside the user-facing product.
 
 ---
 
-# 24. Future Enhancements
+# 16. Product Release Strategy
 
-* AI-assisted wedding planning.
-* Smart task recommendations.
-* Budget insights and forecasting.
-* Automated reminder optimization.
-* Vendor discovery marketplace.
-* WhatsApp integration.
-* SMS integration.
-* Native mobile apps.
-* Advanced seating optimization.
-* Personalized guest communication.
-* Wedding timeline generation.
-* Post-wedding digital album and keepsake features.
-* AI-powered guest communication assistance.
-* AI-assisted expense categorization.
-* Intelligent wedding-day issue prioritization.
+Even though all features belong to the V1 product vision, implementation should happen incrementally.
+
+## Phase 1: Foundation
+
+- Authentication
+- Wedding creation
+- Wedding Members
+- Dashboard shell
+
+## Phase 2: Planning
+
+- Events
+- Tasks
+
+## Phase 3: Guests
+
+- Guest management
+- Invitations
+- RSVP
+- Email
+- WhatsApp sharing
+
+## Phase 4: Financial and Vendors
+
+- Expense tracker
+- My Vendors
+- Vendor discovery
+
+## Phase 5: Wedding Experience
+
+- Wedding website
+- Themes
+- YouTube livestream
+
+## Phase 6: Memories
+
+- Gallery
+- Guest photo uploads
+- Albums
+- Private sharing
+- QR code
+
+## Phase 7: Production Readiness
+
+- Error handling
+- Security review
+- Responsive design
+- Performance
+- Testing
+- Analytics
+- Deployment
+- Monitoring
 
 ---
 
-# 25. Product Principle
+# 17. Future Product Opportunities
 
-**Build one connected wedding system, not twenty independent CRUD modules.**
+These features are deliberately excluded from V1 but could evolve the platform later.
 
-Every major feature should connect back to:
+### Communication
 
-* The wedding
-* Its events
-* Its people
-* Its responsibilities
-* Its finances
-* Its communication
-* Its execution
-* Its memories
+- WhatsApp API
+- SMS reminders
+- Automated RSVP reminders
 
-MongoDB should support this connected experience through a deliberate document model that balances **embedding, referencing, indexing, aggregation, and tenant isolation**.
+### Advanced Guest Management
 
-The goal is not simply to replace spreadsheets with CRUD screens.
+- Household management
+- Meal preferences
+- Seating arrangements
+- Accommodation
+- Transportation
 
-The goal is to create a **single, connected operating system for managing an Indian wedding from planning through execution and memories.**
+### Financial Management
+
+- Wedding budgets
+- Vendor advances
+- Payment schedules
+- Expense splitting
+- Bride/groom family expenditure tracking
+
+### Vendors
+
+- Vendor profiles
+- Reviews
+- Vendor onboarding
+- Marketplace
+- Booking
+- Payments
+
+### Wedding Website
+
+- Custom domains
+- More themes
+- Custom page sections
+- Advanced website builder
+
+### Photos
+
+- Face recognition
+- "Find my photos"
+- AI photo tagging
+- Automatic event classification
+
+### AI Wedding Assistant
+
+A future AI layer could understand the entire wedding workspace.
+
+Examples:
+
+**"What should I focus on this week?"**
+
+**"Which important wedding tasks are delayed?"**
+
+**"Create a checklist for my Haldi ceremony."**
+
+**"I have 300 guests. Suggest things I may have forgotten."**
+
+**"Summarize my upcoming payments and vendors."**
+
+AI should eventually enhance the actual product data rather than simply adding a generic chatbot.
+
+---
+
+# 18. V1 Product Definition
+
+Make My Marriage V1 is considered functionally complete when:
+
+> A bride or groom can create a wedding, invite family members to collaboratively manage it, create wedding events, manage tasks, maintain guests, send invitations, collect RSVPs, track expenses, manage and discover vendors, publish a themed wedding website, embed a YouTube livestream, and privately collect and share wedding photos through links and QR codes, while guests can participate without creating accounts.
+
+---
+
+# 19. Product Principle
+
+Whenever deciding whether something belongs in V1, use this question:
+
+> **Does this feature directly help a family plan, coordinate, celebrate, or preserve their wedding?**
+
+If yes, consider it.
+
+If it introduces significant complexity without meaningfully improving the core wedding-management experience, defer it.
+
+The objective of V1 is not to build every possible wedding-related feature.
+
+The objective is to build a cohesive product that a real Indian family could genuinely use for their wedding.
