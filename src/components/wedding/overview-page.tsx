@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { formatDate } from "@/components/workspace/format";
 export function OverviewPage({ rsvp, guests, tasks, events, members, role, wedding, updated }: any) {

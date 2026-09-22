@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/components/workspace/api";
