@@ -8,14 +8,14 @@ describe("environment configuration", () => {
 
   it("loads database configuration without requiring auth configuration", async () => {
     vi.stubEnv("MONGODB_URI", "mongodb://localhost:27017");
-    vi.stubEnv("MONGODB_DB_NAME", "make-my-marriage-test");
+    vi.stubEnv("MONGODB_DB_NAME", "my-marriage-test");
     vi.stubEnv("AUTH_TOKEN_PEPPER", "");
 
     const { getDatabaseEnv } = await import("./env");
 
     expect(getDatabaseEnv()).toEqual({
       MONGODB_URI: "mongodb://localhost:27017",
-      MONGODB_DB_NAME: "make-my-marriage-test",
+      MONGODB_DB_NAME: "my-marriage-test",
     });
   });
 });

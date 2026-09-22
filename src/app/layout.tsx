@@ -22,8 +22,8 @@ const playfair = localFont({
 
 export const metadata: Metadata = {
   title: {
-    default: "Make My Marriage",
-    template: "%s | Make My Marriage",
+    default: " My Marriage",
+    template: "%s |  My Marriage",
   },
   description: "A shared workspace for planning every part of your wedding.",
 };

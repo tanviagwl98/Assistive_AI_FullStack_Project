@@ -8,7 +8,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# Make My Marriage project rules
+#  My Marriage project rules
 
 - Treat `docs/PRD.md`, `docs/SYSTEM_DESIGN.md`, `docs/DATABASE_DESIGN.md`, and
   `docs/API_DESIGN.md` as the source of truth. Point out contradictions instead

@@ -14,7 +14,7 @@
 
 # 1. Purpose
 
-This document defines the REST API design for **Make My Marriage V1**.
+This document defines the REST API design for ** My Marriage V1**.
 
 It covers:
 

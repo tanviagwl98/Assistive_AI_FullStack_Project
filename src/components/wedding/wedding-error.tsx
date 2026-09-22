@@ -1,0 +1,3 @@
+"use client";
+import Link from "next/link";
+export function WeddingError({ reset }: { reset: () => void }) { return <main className="container py-16"><section className="max-w-xl rounded-card border bg-surface p-8 shadow-soft"><p className="eyebrow"> My Marriage</p><h1 className="mt-3">We couldn’t load this wedding workspace.</h1><p className="mt-3 text-muted-foreground">Please try again in a moment.</p><div className="mt-6 flex gap-3"><button className="button button-primary" onClick={reset}>Try again</button><Link className="button button-secondary" href="/dashboard">Dashboard</Link></div></section></main>; }

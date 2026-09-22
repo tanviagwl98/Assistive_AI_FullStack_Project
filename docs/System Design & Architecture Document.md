@@ -10,7 +10,7 @@
 
 # 1. Purpose
 
-This document defines the high-level system architecture for **Make My Marriage**, a collaborative Indian wedding-management platform.
+This document defines the high-level system architecture for ** My Marriage**, a collaborative Indian wedding-management platform.
 
 The purpose of this document is to establish:
 
@@ -363,7 +363,7 @@ These pages include:
 
 # 8. Authentication Architecture
 
-Make My Marriage will implement custom email/password authentication.
+ My Marriage will implement custom email/password authentication.
 
 No external authentication framework will be required for V1.
 
@@ -1320,7 +1320,7 @@ Wedding Website
 Embedded YouTube Player
 ```
 
-Make My Marriage is therefore only responsible for displaying the stream.
+ My Marriage is therefore only responsible for displaying the stream.
 
 ---
 
@@ -1952,7 +1952,7 @@ Flow:
 ```text
 Browser
   ↓
-Make My Marriage API
+ My Marriage API
   ↓
 Google Places API
 ```
@@ -2568,7 +2568,7 @@ We will not use:
 
 # 94. Final System Summary
 
-Make My Marriage V1 will operate as a **TypeScript modular monolith built using Next.js**, with the same application serving the user interface and explicit REST backend APIs.
+ My Marriage V1 will operate as a **TypeScript modular monolith built using Next.js**, with the same application serving the user interface and explicit REST backend APIs.
 
 Authenticated bride, groom and family members will interact through server-side sessions and secure cookies. Every Wedding represents an isolated application tenant.
 
@@ -2582,7 +2582,7 @@ Google Places will provide local vendor discovery, while selected vendors are st
 
 Wedding websites will be rendered by Next.js using stable slugs and predefined themes.
 
-YouTube will provide livestream infrastructure, with Make My Marriage only embedding the configured stream.
+YouTube will provide livestream infrastructure, with  My Marriage only embedding the configured stream.
 
 The entire application will deploy to Vercel without additional servers, containers, queues, cache clusters, or microservices.
 
@@ -2681,5 +2681,5 @@ cache is stored in localStorage.
 
 Verification: `npm test` uses mocked persistence/storage and component tests.
 `RUN_R2_SMOKE=1 npm test -- src/server/storage/r2.integration.test.ts` explicitly
-loads `.env.local`, refuses any bucket other than make-my-marriage-dev, and
+loads `.env.local`, refuses any bucket other than my-marriage-dev, and
 uploads/reads/deletes only a unique test-fixtures prefix. It never uses MongoDB.

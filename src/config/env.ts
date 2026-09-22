@@ -5,7 +5,7 @@ import { AppError } from "@/server/http/app-error";
 
 const databaseEnvSchema = z.object({
   MONGODB_URI: z.string().min(1),
-  MONGODB_DB_NAME: z.string().min(1).default("make-my-marriage"),
+  MONGODB_DB_NAME: z.string().min(1).default("my-marriage"),
 });
 
 const authEnvSchema = z.object({

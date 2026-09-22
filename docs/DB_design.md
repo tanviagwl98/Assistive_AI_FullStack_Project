@@ -12,7 +12,7 @@
 
 # 1. Purpose
 
-This document defines the MongoDB data model for **Make My Marriage V1**.
+This document defines the MongoDB data model for ** My Marriage V1**.
 
 It covers:
 
