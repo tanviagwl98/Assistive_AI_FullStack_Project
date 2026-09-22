@@ -1,5 +1,9 @@
-import Link from "next/link";
+import { HomePage } from '@/components/home/home-page';
+import { HomeSession } from '@/components/home/home-session';
+import { currentAccount } from '@/modules/auth/service';
 
-export default function HomePage() {
-  return <main><p className="eyebrow">Make My Marriage</p><h1>One shared workspace for your wedding.</h1><p>Plan events, guests, tasks, vendors, expenses and memories together.</p><div className="actions"><Link className="button" href="/signup">Create an account</Link><Link className="button button--secondary" href="/login">Log in</Link></div></main>;
+export default async function Home() {
+  const account = await currentAccount();
+  const initialState = !account ? 'signed-out' : account.wedding ? 'wedding' : 'onboarding';
+  return <HomeSession initialState={initialState}><HomePage /></HomeSession>;
 }
