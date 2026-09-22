@@ -1,0 +1,1 @@
+export default function CreateWeddingPage() { return <main><section className="card"><h1>Create your wedding</h1><p>Tell us about the couple, primary wedding date and location.</p></section></main>; }

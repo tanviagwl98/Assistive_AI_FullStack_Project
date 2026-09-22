@@ -1,0 +1,5 @@
+import { model, models, Schema } from "mongoose";
+import { RSVP_STATUSES } from "@/constants/domain";
+const schema = new Schema({ weddingId: { type: Schema.Types.ObjectId, required: true, ref: "Wedding" }, name: { type: String, required: true }, email: String, emailNormalized: String, phone: String, maxGuests: { type: Number, required: true, min: 1 }, invitedEventIds: [{ type: Schema.Types.ObjectId, ref: "Event" }], notes: String, invitationToken: { type: String, required: true, unique: true, select: false }, invitationSentAt: Date, lastReminderSentAt: Date, reminderCount: { type: Number, default: 0 }, rsvpStatus: { type: String, enum: RSVP_STATUSES, default: "PENDING" }, attendingCount: Number, rsvpUpdatedAt: Date }, { timestamps: true });
+schema.index({ weddingId: 1, rsvpStatus: 1 }); schema.index({ weddingId: 1, name: 1 }); schema.index({ weddingId: 1, emailNormalized: 1 }); schema.index({ weddingId: 1, invitedEventIds: 1 });
+export const Guest = models.Guest ?? model("Guest", schema);
