@@ -1,4 +1,0 @@
-import { model, models, Schema } from "mongoose";
-const schema = new Schema({ weddingId: { type: Schema.Types.ObjectId, required: true, ref: "Wedding" }, type: { type: String, enum: ["GUEST_INVITATION", "RSVP_REMINDER"], required: true }, guestId: { type: Schema.Types.ObjectId, required: true, ref: "Guest" }, recipientEmail: { type: String, required: true }, status: { type: String, enum: ["PENDING", "PROCESSING", "SENT", "FAILED", "CANCELLED"], default: "PENDING" }, batchId: String, idempotencyKey: { type: String, required: true, unique: true }, attempts: { type: Number, default: 0 }, nextAttemptAt: Date, lockedAt: Date, lockId: String, sentAt: Date, providerMessageId: String, lastError: String }, { timestamps: true });
-schema.index({ status: 1, nextAttemptAt: 1, createdAt: 1 }); schema.index({ weddingId: 1, status: 1 }); schema.index({ batchId: 1 }); schema.index({ guestId: 1 });
-export const EmailJob = models.EmailJob ?? model("EmailJob", schema);

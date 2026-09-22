@@ -1,5 +1,0 @@
-import { model, models, Schema } from "mongoose";
-const categories = ["VENUE", "CATERING", "PHOTOGRAPHY", "VIDEOGRAPHY", "DECORATION", "CLOTHING", "JEWELLERY", "ENTERTAINMENT", "INVITATIONS", "GIFTS", "TRAVEL", "MAKEUP", "OTHER"];
-const schema = new Schema({ weddingId: { type: Schema.Types.ObjectId, required: true, ref: "Wedding" }, title: { type: String, required: true }, amountPaise: { type: Number, required: true, min: 0 }, currency: { type: String, enum: ["INR"], default: "INR" }, expenseDate: { type: Date, required: true }, category: { type: String, enum: categories, required: true }, eventId: { type: Schema.Types.ObjectId, ref: "Event" }, vendorId: { type: Schema.Types.ObjectId, ref: "Vendor" }, notes: String, createdByMembershipId: { type: Schema.Types.ObjectId, required: true, ref: "WeddingMembership" } }, { timestamps: true });
-schema.index({ weddingId: 1, expenseDate: 1 }); schema.index({ weddingId: 1, category: 1 }); schema.index({ weddingId: 1, eventId: 1 }); schema.index({ weddingId: 1, vendorId: 1 });
-export const Expense = models.Expense ?? model("Expense", schema);
