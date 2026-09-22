@@ -411,7 +411,7 @@ Optional:
 
 Example:
 
-**Akshay ❤️ Princi**
+**Tanvi ❤️ X**
 
 14 February 2027  
 Dehradun, Uttarakhand
@@ -670,7 +670,7 @@ The invitation experience should display:
 
 Example:
 
-**Akshay & Princi**
+**Tanvi & X**
 
 would love for you to celebrate their wedding with them.
 
@@ -913,7 +913,7 @@ Each wedding should have a hosted wedding website.
 
 Example:
 
-`makemymarriage.com/w/akshay-princi`
+`makemymarriage.com/w/tanvi-X`
 
 The wedding website is different from the private guest invitation.
 
@@ -1046,7 +1046,7 @@ Example printed message:
 
 **Share the Memories 📸**
 
-Scan to upload and view photos from Akshay & Princi's wedding.
+Scan to upload and view photos from Tanvi & X's wedding.
 
 Wedding Members should be able to:
 
@@ -1208,7 +1208,7 @@ Exact database modelling will be decided during database design.
 
 ---
 
-# 12. Important UX Principles
+# 12. Important UX Xples
 
 ## 12.1 Wedding First
 
@@ -1536,7 +1536,7 @@ Make My Marriage V1 is considered functionally complete when:
 
 ---
 
-# 19. Product Principle
+# 19. Product Xple
 
 Whenever deciding whether something belongs in V1, use this question:
 
