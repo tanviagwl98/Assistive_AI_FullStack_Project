@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 40" fill="none">
+  <path d="M12 28V12L20 22L28 12V28" stroke="#1E1C1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M36 28V12L44 22L52 12V28" stroke="#A65B46" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="62" y="25" font-family="'Playfair Display', serif" font-size="18" font-weight="600" letter-spacing="0.04em" fill="#1E1C1A">My Marriage</text>
+</svg>

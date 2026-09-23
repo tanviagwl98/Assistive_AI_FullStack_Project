@@ -12,11 +12,11 @@
 
 ## 1.1 Product Name
 
-**Make My Marriage**
+** My Marriage**
 
 ## 1.2 Product Vision
 
-Make My Marriage is a digital wedding management platform that helps couples and their families collaboratively plan and manage an Indian wedding from one place.
+ My Marriage is a digital wedding management platform that helps couples and their families collaboratively plan and manage an Indian wedding from one place.
 
 Indian weddings involve multiple events, dozens of tasks, many family members, hundreds of guests, vendors, expenses, invitations, photos, and several moving pieces.
 
@@ -31,7 +31,7 @@ Most families currently manage this using a combination of:
 - Different vendor conversations
 - Shared photo folders
 
-Make My Marriage brings these activities together inside one structured wedding workspace.
+ My Marriage brings these activities together inside one structured wedding workspace.
 
 The product should feel like:
 
@@ -73,7 +73,7 @@ Invitations are shared separately.
 
 Wedding photos get scattered across dozens of devices after the wedding.
 
-Make My Marriage aims to solve this by providing one central wedding workspace.
+ My Marriage aims to solve this by providing one central wedding workspace.
 
 ---
 
@@ -158,7 +158,7 @@ Guests do not have accounts.
 
 Guests do not log in.
 
-Guests interact with Make My Marriage using secure unique links.
+Guests interact with  My Marriage using secure unique links.
 
 A guest may:
 
@@ -210,7 +210,7 @@ The product does not support professional wedding planners managing multiple wed
 
 # 6. Product Goals
 
-Make My Marriage V1 should allow a family to successfully manage the core activities of a wedding from beginning to end.
+ My Marriage V1 should allow a family to successfully manage the core activities of a wedding from beginning to end.
 
 The product should enable users to:
 
@@ -236,7 +236,7 @@ The product should enable users to:
 
 The following functionality is explicitly outside V1.
 
-Make My Marriage V1 will NOT include:
+ My Marriage V1 will NOT include:
 
 - Multiple weddings per user
 - Wedding planner business accounts
@@ -256,7 +256,7 @@ Make My Marriage V1 will NOT include:
 - Payment installment tracking
 - Vendor payment schedules
 - Vendor marketplace transactions
-- Vendor booking through Make My Marriage
+- Vendor booking through  My Marriage
 - Vendor payments
 - WhatsApp API integration
 - SMS integrations
@@ -276,7 +276,7 @@ These may become future releases.
 
 # 8. Primary User Journey
 
-A typical Make My Marriage journey should look like this.
+A typical  My Marriage journey should look like this.
 
 ### Step 1: Signup
 
@@ -411,7 +411,7 @@ Optional:
 
 Example:
 
-**Akshay ❤️ Princi**
+**Tanvi ❤️ X**
 
 14 February 2027  
 Dehradun, Uttarakhand
@@ -670,7 +670,7 @@ The invitation experience should display:
 
 Example:
 
-**Akshay & Princi**
+**Tanvi & X**
 
 would love for you to celebrate their wedding with them.
 
@@ -765,7 +765,7 @@ The button opens WhatsApp with a pre-filled message containing the guest's invit
 
 No WhatsApp API integration is required.
 
-Make My Marriage does not automatically send WhatsApp messages in V1.
+ My Marriage does not automatically send WhatsApp messages in V1.
 
 ---
 
@@ -903,7 +903,7 @@ Users should be able to take a discovered vendor and add it to:
 
 **My Vendors**
 
-Make My Marriage itself does not process vendor bookings or payments.
+ My Marriage itself does not process vendor bookings or payments.
 
 ---
 
@@ -913,7 +913,7 @@ Each wedding should have a hosted wedding website.
 
 Example:
 
-`makemymarriage.com/w/akshay-princi`
+`makemymarriage.com/w/tanvi-X`
 
 The wedding website is different from the private guest invitation.
 
@@ -1046,7 +1046,7 @@ Example printed message:
 
 **Share the Memories 📸**
 
-Scan to upload and view photos from Akshay & Princi's wedding.
+Scan to upload and view photos from Tanvi & X's wedding.
 
 Wedding Members should be able to:
 
@@ -1068,7 +1068,7 @@ They provide:
 
 The wedding website displays the embedded player when configured.
 
-No video streaming infrastructure should be built by Make My Marriage.
+No video streaming infrastructure should be built by  My Marriage.
 
 Wedding Members should be able to:
 
@@ -1208,7 +1208,7 @@ Exact database modelling will be decided during database design.
 
 ---
 
-# 12. Important UX Principles
+# 12. Important UX Xples
 
 ## 12.1 Wedding First
 
@@ -1530,13 +1530,13 @@ AI should eventually enhance the actual product data rather than simply adding a
 
 # 18. V1 Product Definition
 
-Make My Marriage V1 is considered functionally complete when:
+ My Marriage V1 is considered functionally complete when:
 
 > A bride or groom can create a wedding, invite family members to collaboratively manage it, create wedding events, manage tasks, maintain guests, send invitations, collect RSVPs, track expenses, manage and discover vendors, publish a themed wedding website, embed a YouTube livestream, and privately collect and share wedding photos through links and QR codes, while guests can participate without creating accounts.
 
 ---
 
-# 19. Product Principle
+# 19. Product Xple
 
 Whenever deciding whether something belongs in V1, use this question:
 

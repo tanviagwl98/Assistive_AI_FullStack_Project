@@ -12,7 +12,7 @@
 
 # 1. Purpose
 
-This document defines the MongoDB data model for **Make My Marriage V1**.
+This document defines the MongoDB data model for ** My Marriage V1**.
 
 It covers:
 
@@ -36,7 +36,7 @@ Detailed Mongoose implementation and exact API payloads will be designed separat
 
 ---
 
-# 2. Database Design Principles
+# 2. Database Design Xples
 
 ## 2.1 Wedding is the Tenant
 
@@ -318,10 +318,10 @@ Example:
 
 ```text
 email:
-"Akshay.Saini@gmail.com"
+"Tanvi.Saini@gmail.com"
 
 emailNormalized:
-"akshay.saini@gmail.com"
+"tanvi.saini@gmail.com"
 ```
 
 At minimum normalization should:
@@ -673,7 +673,7 @@ website: {
 Example:
 
 ```text
-akshay-princi-14022027
+tanvi-X-14022027
 ```
 
 Index:
@@ -685,7 +685,7 @@ unique(website.slug)
 If a collision occurs:
 
 ```text
-akshay-princi-14022027-2
+tanvi-X-14022027-2
 ```
 
 Once created, the slug remains stable.

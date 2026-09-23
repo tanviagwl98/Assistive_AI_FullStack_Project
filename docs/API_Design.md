@@ -14,7 +14,7 @@
 
 # 1. Purpose
 
-This document defines the REST API design for **Make My Marriage V1**.
+This document defines the REST API design for ** My Marriage V1**.
 
 It covers:
 
@@ -63,7 +63,7 @@ HTTP Response
 
 ---
 
-# 2. API Design Principles
+# 2. API Design Xples
 
 ## 2.1 Explicit REST APIs
 
@@ -430,8 +430,8 @@ Creates an account and authenticated session.
 
 ```json
 {
-  "name": "Akshay Saini",
-  "email": "akshay@example.com",
+  "name": "Tanvi Saini",
+  "email": "tanvi@example.com",
   "password": "strong-password"
 }
 ```
@@ -461,8 +461,8 @@ Set Cookie
   "data": {
     "user": {
       "id": "userId",
-      "name": "Akshay Saini",
-      "email": "akshay@example.com"
+      "name": "Tanvi Agarwal",
+      "email": "tanvi@example.com"
     },
     "hasWedding": false
   }
@@ -488,7 +488,7 @@ No email verification occurs.
 
 ```json
 {
-  "email": "akshay@example.com",
+  "email": "tanvi@example.com",
   "password": "password"
 }
 ```
@@ -500,8 +500,8 @@ No email verification occurs.
   "data": {
     "user": {
       "id": "userId",
-      "name": "Akshay Saini",
-      "email": "akshay@example.com"
+      "name": "Tanvi Saini",
+      "email": "tanvi@example.com"
     },
     "hasWedding": true
   }
@@ -563,16 +563,16 @@ Returns current authenticated user and Wedding membership information.
   "data": {
     "user": {
       "id": "userId",
-      "name": "Akshay Saini",
-      "email": "akshay@example.com"
+      "name": "Tanvi Saini",
+      "email": "tanvi@example.com"
     },
     "membership": {
       "role": "ADMIN"
     },
     "wedding": {
       "id": "weddingId",
-      "brideName": "Princi",
-      "groomName": "Akshay",
+      "brideName": "X",
+      "groomName": "Tanvi",
       "weddingDate": "2027-02-14"
     }
   }
@@ -586,8 +586,8 @@ If user does not yet belong to a Wedding:
   "data": {
     "user": {
       "id": "userId",
-      "name": "Akshay Saini",
-      "email": "akshay@example.com"
+      "name": "Tanvi Saini",
+      "email": "tanvi@example.com"
     },
     "membership": null,
     "wedding": null
@@ -605,7 +605,7 @@ If user does not yet belong to a Wedding:
 
 ```json
 {
-  "email": "akshay@example.com"
+  "email": "tanvi@example.com"
 }
 ```
 
@@ -676,9 +676,9 @@ Only users without an existing Wedding Membership can use this endpoint.
 
 ```json
 {
-  "brideName": "Princi",
-  "groomName": "Akshay",
-  "title": "Akshay & Princi",
+  "brideName": "X",
+  "groomName": "Tanvi",
+  "title": "Tanvi & X",
   "description": "We are getting married!",
   "weddingDate": "2027-02-14",
   "timeZone": "Asia/Kolkata",
@@ -717,11 +717,11 @@ gallery token
 {
   "data": {
     "id": "weddingId",
-    "brideName": "Princi",
-    "groomName": "Akshay",
+    "brideName": "X",
+    "groomName": "Tanvi",
     "weddingDate": "2027-02-14",
     "website": {
-      "slug": "princi-akshay-14022027"
+      "slug": "X-tanvi-14022027"
     }
   }
 }
@@ -750,9 +750,9 @@ Returns current Wedding.
 {
   "data": {
     "id": "weddingId",
-    "brideName": "Princi",
-    "groomName": "Akshay",
-    "title": "Akshay & Princi",
+    "brideName": "X",
+    "groomName": "Tanvi",
+    "title": "Tanvi & X",
     "description": "...",
     "weddingDate": "2027-02-14",
     "timeZone": "Asia/Kolkata",
@@ -788,8 +788,8 @@ Any subset:
 
 ```json
 {
-  "brideName": "Princi",
-  "groomName": "Akshay",
+  "brideName": "X",
+  "groomName": "Tanvi",
   "description": "Updated welcome message",
   "weddingDate": "2027-02-14",
   "location": {
@@ -863,8 +863,8 @@ Admin and Manager can view members.
       "membershipId": "...",
       "user": {
         "id": "...",
-        "name": "Akshay Saini",
-        "email": "akshay@example.com"
+        "name": "Tanvi Saini",
+        "email": "tanvi@example.com"
       },
       "role": "ADMIN",
       "joinedAt": "..."
@@ -966,8 +966,8 @@ Returns enough information to render the invitation page.
     "email": "rahul@example.com",
     "role": "MANAGER",
     "wedding": {
-      "brideName": "Princi",
-      "groomName": "Akshay",
+      "brideName": "X",
+      "groomName": "Tanvi",
       "weddingDate": "2027-02-14"
     },
     "requiresLogin": true
@@ -1754,8 +1754,8 @@ Return invitation data
       "attendingCount": null
     },
     "wedding": {
-      "brideName": "Princi",
-      "groomName": "Akshay",
+      "brideName": "X",
+      "groomName": "Tanvi",
       "weddingDate": "2027-02-14",
       "timeZone": "Asia/Kolkata",
       "title": "Our celebration",
@@ -2205,7 +2205,7 @@ Authentication required.
 ```json
 {
   "data": {
-    "slug": "princi-akshay-14022027",
+    "slug": "X-tanvi-14022027",
     "theme": "CLASSIC",
     "isPublished": false,
     "welcomeMessage": "..."
@@ -2248,9 +2248,9 @@ Returns only public website information.
 ```json
 {
   "data": {
-    "brideName": "Princi",
-    "groomName": "Akshay",
-    "title": "Akshay & Princi",
+    "brideName": "X",
+    "groomName": "Tanvi",
+    "title": "Tanvi & X",
     "description": "...",
     "weddingDate": "2027-02-14",
     "coverImageUrl": "...",
@@ -2536,8 +2536,8 @@ Returns:
 {
   "data": {
     "wedding": {
-      "brideName": "Princi",
-      "groomName": "Akshay",
+      "brideName": "X",
+      "groomName": "Tanvi",
       "weddingDate": "2027-02-14"
     },
     "guestUploadsEnabled": true,
@@ -3594,7 +3594,7 @@ Product Analytics
 
 ---
 
-# 110. API Design Principles to Freeze
+# 110. API Design Xples to Freeze
 
 ## Decision 1
 
