@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { z } from "zod";
-import { getPublicGuestInvitation } from "@/modules/guests/invitation-service";
+import { getPublicGuestInvitation } from "@/modules/guests/invitations-service";
 import { AppError } from "@/server/http/app-error";
 import { InvitationUnavailable, PublicInvitationPage } from "@/components/invitations/public-invitation";
 export const metadata = { title: "Your personal invitation", description: "A private invitation to celebrate together.", robots: { index: false, follow: false, noarchive: true }, referrer: "no-referrer" as const };

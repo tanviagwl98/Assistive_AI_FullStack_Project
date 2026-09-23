@@ -1,5 +1,5 @@
 import { authenticatedAccount } from "@/modules/auth/service";
-import { getRsvpSummary } from "@/modules/guests/invitation-service";
+import { getRsvpSummary } from "@/modules/guests/invitations-service";
 import { authBoundary, validateAuthRequest } from "@/server/auth/http";
 import { AppError } from "@/server/http/app-error";
 import { successResponse } from "@/server/http/responses";

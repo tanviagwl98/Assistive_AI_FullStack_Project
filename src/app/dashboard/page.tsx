@@ -1,4 +1,4 @@
-import { getRsvpSummary } from "@/modules/guests/invitation-service";
+import { getRsvpSummary } from "@/modules/guests/invitations-service";
 import { getGuestSummary } from "@/modules/guests/service";
 import { getTaskSummary } from "@/modules/tasks/service";
 import { listEvents } from "@/modules/events/service";

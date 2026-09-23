@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { authenticatedAccount } from "@/modules/auth/service";
-import { getGuestInvitationLink } from "@/modules/guests/invitation-service";
+import { getGuestInvitationLink } from "@/modules/guests/invitations-service";
 import { objectIdSchema } from "@/server/db/object-id";
 import { authBoundary, validateAuthRequest } from "@/server/auth/http";
 import { AppError } from "@/server/http/app-error";

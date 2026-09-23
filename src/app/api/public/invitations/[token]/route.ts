@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getPublicGuestInvitation } from "@/modules/guests/invitation-service";
+import { getPublicGuestInvitation } from "@/modules/guests/invitations-service";
 import { authBoundary, validateAuthRequest } from "@/server/auth/http";
 import { successResponse } from "@/server/http/responses";
 export async function GET(request: Request, context: { params: Promise<{ token: string }> }) {

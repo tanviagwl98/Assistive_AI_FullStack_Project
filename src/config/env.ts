@@ -1,7 +1,7 @@
 import "server-only";
 
 import { z } from "zod";
-import { AppError } from "@/server/http/app-error";
+import { AppError } from "@/server/http/app-error"
 
 const databaseEnvSchema = z.object({
   MONGODB_URI: z.string().min(1),
