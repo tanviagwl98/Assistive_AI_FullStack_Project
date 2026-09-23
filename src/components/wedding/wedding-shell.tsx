@@ -1,6 +1,34 @@
+import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import { LogoutButton } from "@/components/auth/auth-form";
+import { SessionSync } from "@/components/auth/session-sync";
+import { WeddingDraftSession } from "./draft-session";
+import { UnsavedChanges } from "./unsaved-changes";
+import styles from "./wedding.module.css";
+import { WorkspaceFrame } from "@/components/workspace/workspace-frame";
 
-const links = [["Dashboard", "/dashboard"], ["Events", "/events"], ["Tasks", "/tasks"], ["Guests", "/guests"], ["Photos", "/gallery"]] as const;
-export function WeddingShell({ children, user, weddingId, role, editing }: { children: React.ReactNode; user?: { name?: string }; weddingId: string | null; role?: string; editing?: boolean }) {
-  return <div className="min-h-screen bg-background"><header className="border-b bg-surface"><div className="container flex min-h-16 flex-wrap items-center justify-between gap-3 py-3"><Link href="/dashboard" className="font-serif text-xl text-primary"> My Marriage</Link>{weddingId && <nav aria-label="Wedding workspace" className="flex flex-wrap gap-3 text-sm text-muted-foreground">{links.map(([label, href]) => <Link key={href} href={href} className="hover:text-primary">{label}</Link>)}{role === "ADMIN" && <Link href="/settings/members" className="hover:text-primary">Members</Link>}</nav>}<span className="text-sm text-muted-foreground">{editing ? "Editing" : user?.name ?? ""}</span></div></header>{children}</div>;
+export function WeddingShell({ children, user, weddingId, role, editing = false }: {
+  children: ReactNode; user: { id: string; name: string }; weddingId: string | null; role?: string; editing?: boolean;
+}) {
+  const content = (
+    <div className={styles.shell}>
+      <a href="#wedding-content" className={styles.skip}>Skip to content</a>
+      <header className={styles.header}><div className={styles.headerInner}>
+        <Link href="/" aria-label="Make My Marriage home"><Image src="/images/make-my-marriage-logo.svg" alt="Make My Marriage" width={220} height={55} priority/></Link>
+        <div className={styles.account}>
+          {role === "ADMIN" && <Link className={styles.membersLink} href="/settings/members">Wedding members</Link>}
+          {role && <div className={styles.identity}><span className={styles.userName} title={user.name}>{user.name}</span><span className={styles.role}>{role === "ADMIN" ? "Admin" : "Manager"}</span></div>}
+          <LogoutButton className={styles.signOut}/>
+        </div>
+      </div></header>
+      {children}
+      <footer className={styles.footer}>© {new Date().getFullYear()} Make My Marriage. All rights reserved.</footer>
+    </div>
+  );
+  const workspace = <WorkspaceFrame user={user} role={role}>{children}</WorkspaceFrame>;
+  if (editing) return <WeddingDraftSession key={`${user.id}:${weddingId}`} userId={user.id} weddingId={weddingId}><UnsavedChanges>{workspace}</UnsavedChanges></WeddingDraftSession>;
+  return weddingId === null
+    ? <WeddingDraftSession key={user.id} userId={user.id}>{content}</WeddingDraftSession>
+    : <SessionSync userId={user.id} weddingId={weddingId} role={role}>{workspace}</SessionSync>;
 }

@@ -1,3 +1,7 @@
 "use client";
 import Link from "next/link";
-export function WeddingError({ reset }: { reset: () => void }) { return <main className="container py-16"><section className="max-w-xl rounded-card border bg-surface p-8 shadow-soft"><p className="eyebrow"> My Marriage</p><h1 className="mt-3">We couldn’t load this wedding workspace.</h1><p className="mt-3 text-muted-foreground">Please try again in a moment.</p><div className="mt-6 flex gap-3"><button className="button button-primary" onClick={reset}>Try again</button><Link className="button button-secondary" href="/dashboard">Dashboard</Link></div></section></main>; }
+import styles from "./wedding.module.css";
+
+export function WeddingError({ reset }: { reset: () => void }) {
+  return <main className={styles.errorPage}><section className={styles.formCard}><p className={styles.eyebrow}>Make My Marriage</p><h1>We couldn’t load your wedding.</h1><p className={styles.intro}>Please try again in a moment.</p><button className={styles.submit} onClick={reset}>Try again</button><Link href="/" className={styles.backHome}>Back to the homepage</Link></section></main>;
+}

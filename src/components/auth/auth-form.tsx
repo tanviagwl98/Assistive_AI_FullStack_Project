@@ -1,12 +1,58 @@
 "use client";
-
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { apiRequest } from "@/components/workspace/api";
+import styles from "./auth.module.css";
+import { notifySessionChange } from "./session-events";
+import { useUnsavedChanges } from "@/components/wedding/unsaved-changes";
 
-export function AuthForm({ mode, returnTo, invitedEmail }: { mode: "login" | "signup"; returnTo?: string; invitedEmail?: string | null }) {
-  const router = useRouter(); const signup = mode === "signup";
-  const [error, setError] = useState(""); const [pending, setPending] = useState(false);
-  async function submit(formData: FormData) { setPending(true); setError(""); try { const payload = Object.fromEntries(formData); const result = await apiRequest<{ hasWedding?: boolean }>(`/api/auth/${signup ? "signup" : "login"}`, "POST", payload); router.replace(returnTo ?? (result.hasWedding ? "/dashboard" : "/onboarding")); router.refresh(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Unable to continue."); } finally { setPending(false); } }
-  return <form action={submit} className="mt-7 grid gap-4"><label className="grid gap-1 text-sm font-semibold">{signup && <>Your name<input required name="name" autoComplete="name" className="rounded-md border bg-white px-3 py-2 font-normal" /></>}</label><label className="grid gap-1 text-sm font-semibold">Email<input required name="email" type="email" defaultValue={invitedEmail ?? ""} autoComplete="email" className="rounded-md border bg-white px-3 py-2 font-normal" /></label><label className="grid gap-1 text-sm font-semibold">Password<input required name="password" type="password" minLength={8} autoComplete={signup ? "new-password" : "current-password"} className="rounded-md border bg-white px-3 py-2 font-normal" /></label>{error && <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-danger">{error}</p>}<button disabled={pending} className="button button-primary mt-2 disabled:opacity-60">{pending ? "Please wait…" : signup ? "Create account" : "Sign in"}</button></form>;
+export function AuthForm({ mode, returnTo, invitedEmail }: { mode: "signup" | "login"; returnTo?: string; invitedEmail?: string }) {
+  const router = useRouter();
+  const signup = mode === "signup";
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [visible, setVisible] = useState(false);
+  return <form className={styles.form} onSubmit={async event => {
+    event.preventDefault();
+    if (pending) return;
+    const values = new FormData(event.currentTarget);
+    setPending(true); setError("");
+    try {
+      const response = await fetch(`/api/auth/${mode}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.fromEntries(values)) });
+      const result = await response.json();
+      if (!response.ok) {
+        const details = result.error?.details;
+        setError(details ? Object.values(details).flat().join(" ") : result.error?.message ?? "Something went wrong. Please try again.");
+        return;
+      }
+      notifySessionChange();
+      router.replace(returnTo ?? (result.data.hasWedding ? "/dashboard" : "/onboarding")); router.refresh();
+    } catch { setError("We couldn’t connect. Please try again."); }
+    finally { setPending(false); }
+  }}>
+    {returnTo && !signup && <p className={styles.switch}>First time here? <Link href={`/signup?next=${encodeURIComponent(returnTo)}`}>Create an account to join</Link>. Receiving an invitation doesn’t create an account for you.</p>}
+    {signup && <label>Your name<input name="name" autoComplete="name" required minLength={2} maxLength={100} placeholder="Your full name" disabled={pending}/></label>}
+    <label>Email address<input name="email" type="email" autoComplete="email" defaultValue={invitedEmail ?? ""} required maxLength={254} placeholder="you@example.com" disabled={pending}/></label>
+    <label>Password<span className={styles.password}><input name="password" type={visible ? "text" : "password"} autoComplete={signup ? "new-password" : "current-password"} required minLength={signup ? 12 : 1} maxLength={128} aria-describedby={signup ? "password-hint" : undefined} disabled={pending}/><button type="button" onClick={() => setVisible(!visible)} aria-label={visible ? "Hide password" : "Show password"} aria-pressed={visible}>{visible ? "Hide" : "Show"}</button></span></label>
+    {signup && <p id="password-hint" className={styles.hint}>Use at least 12 characters. Spaces are welcome.</p>}
+    <div role="alert" className={styles.error}>{error}</div>
+    <button className={styles.primary} disabled={pending} type="submit">{pending ? "One moment…" : signup ? "Create your account →" : "Sign in →"}</button>
+    <p className={styles.switch}>{signup ? "Already have an account?" : "New to Make My Marriage?"} <Link href={`${signup ? "/login" : "/signup"}${returnTo ? `?next=${encodeURIComponent(returnTo)}` : ""}`}>{signup ? "Sign in" : "Create an account"}</Link></p>
+  </form>;
+}
+export function LogoutButton({ className }: { className?: string }) {
+  const router = useRouter();
+  const guard = useUnsavedChanges();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const signOut = async () => {
+    setPending(true); setError("");
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (response.ok || response.status === 401) { notifySessionChange(); router.replace("/login"); router.refresh(); }
+      else setError("We couldn’t sign you out. Please try again.");
+    } catch { setError("We couldn’t connect. Please try again."); }
+    finally { setPending(false); }
+  };
+  return <div><button className={className ?? styles.primary} disabled={pending} onClick={() => guard ? guard.leave(() => { void signOut(); }) : void signOut()}>{pending ? "Signing out…" : "Sign out"}</button><p role="alert" className={styles.error}>{error}</p></div>;
 }

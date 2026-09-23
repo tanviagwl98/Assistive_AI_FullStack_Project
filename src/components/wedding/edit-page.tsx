@@ -1,6 +1,17 @@
-"use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { apiRequest } from "@/components/workspace/api";
-export function EditWeddingPage({ wedding }: { wedding: any }) { const router = useRouter(); const [error, setError] = useState(""); async function submit(data: FormData) { try { await apiRequest("/api/wedding", "PATCH", { brideName: data.get("brideName"), groomName: data.get("groomName"), title: data.get("title") || undefined, description: data.get("description") || undefined, weddingDate: data.get("weddingDate"), location: { formattedAddress: data.get("location") || undefined } }); router.replace("/dashboard?updated=1"); router.refresh(); } catch (e) { setError(e instanceof Error ? e.message : "Unable to save changes."); } } return <main className="container py-10"><section className="mx-auto max-w-2xl rounded-card border bg-surface p-7 shadow-soft"><p className="eyebrow">Wedding settings</p><h1 className="mt-3">Wedding details</h1><form action={submit} className="mt-7 grid gap-4 sm:grid-cols-2"><label>Bride’s name<input name="brideName" required defaultValue={wedding.brideName} className="mt-1 w-full rounded-md border p-2" /></label><label>Groom’s name<input name="groomName" required defaultValue={wedding.groomName} className="mt-1 w-full rounded-md border p-2" /></label><label className="sm:col-span-2">Title<input name="title" defaultValue={wedding.title ?? ""} className="mt-1 w-full rounded-md border p-2" /></label><label>Wedding date<input name="weddingDate" required type="date" defaultValue={wedding.weddingDate} className="mt-1 w-full rounded-md border p-2" /></label><label>Location<input name="location" defaultValue={wedding.location?.formattedAddress ?? ""} className="mt-1 w-full rounded-md border p-2" /></label><label className="sm:col-span-2">Description<textarea name="description" defaultValue={wedding.description ?? ""} className="mt-1 min-h-28 w-full rounded-md border p-2" /></label>{error && <p className="sm:col-span-2 text-danger" role="alert">{error}</p>}<button className="button button-primary sm:col-span-2">Save details</button></form></section></main>; }
+import type { getWeddingContext } from "@/modules/weddings/service";
+import { WeddingDetailsForm } from "./wedding-details-form";
+import { WeddingArch } from "./arch";
+import styles from "./wedding.module.css";
+
+type Wedding = NonNullable<Awaited<ReturnType<typeof getWeddingContext>>["wedding"]>;
+export function EditWeddingPage({ wedding }: { wedding: Wedding }) {
+  const location = wedding.location.formattedAddress || [wedding.location.city, wedding.location.state, wedding.location.country].filter(Boolean).join(", ");
+  return <main id="wedding-content" className={styles.editPage}>
+    <a href="/dashboard" className={styles.backLink}>← Back to your wedding</a>
+    <h1>Edit your wedding</h1><p className={styles.intro}>Update the details that make your celebration yours.</p>
+    <div className={styles.editGrid}>
+      <section className={styles.formCard} aria-label="Wedding details"><WeddingDetailsForm initialValues={{ brideName: wedding.brideName, groomName: wedding.groomName, weddingDate: wedding.weddingDate, title: wedding.title, description: wedding.description, timeZone: wedding.timeZone, location }}/></section>
+      <aside className={styles.aside}><div className={styles.illustrationCard}><div className={styles.largeArch}><WeddingArch/></div><p className={styles.eyebrow}>Dedicated atelier</p><h2>{wedding.brideName} &amp; {wedding.groomName}</h2><p>Changes made here update your wedding overview and the details of your celebration.</p><div className={styles.cardFoot}><span>Wedding location</span><span>{location}</span></div></div><div className={styles.adminNote}><span aria-hidden="true">♧</span><div><h3>Your shared wedding details</h3><p>Admins and Managers can keep these details up to date.</p></div></div></aside>
+    </div>
+  </main>;
+}

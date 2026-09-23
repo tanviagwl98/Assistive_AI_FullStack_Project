@@ -1,5 +1,17 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { apiRequest } from "@/components/workspace/api";
-export function OnboardingPage() { const router = useRouter(); const [error, setError] = useState(""); const [pending, setPending] = useState(false); async function submit(data: FormData) { setPending(true); setError(""); const location = { formattedAddress: String(data.get("location") || "") }; try { await apiRequest("/api/wedding", "POST", { brideName: data.get("brideName"), groomName: data.get("groomName"), weddingDate: data.get("weddingDate"), timeZone: "Asia/Kolkata", title: data.get("title") || undefined, location }); router.replace("/dashboard"); router.refresh(); } catch (e) { setError(e instanceof Error ? e.message : "Unable to create your wedding."); } finally { setPending(false); } } return <main className="container py-10"><section className="mx-auto max-w-2xl rounded-card border bg-surface p-7 shadow-soft"><p className="eyebrow">Let’s begin</p><h1 className="mt-3">Create your wedding workspace</h1><p className="mt-2 text-muted-foreground">You can update every detail later.</p><form action={submit} className="mt-7 grid gap-4 sm:grid-cols-2"><label>Bride’s name<input required name="brideName" className="mt-1 w-full rounded-md border p-2" /></label><label>Groom’s name<input required name="groomName" className="mt-1 w-full rounded-md border p-2" /></label><label className="sm:col-span-2">Wedding title (optional)<input name="title" className="mt-1 w-full rounded-md border p-2" /></label><label>Wedding date<input required name="weddingDate" type="date" className="mt-1 w-full rounded-md border p-2" /></label><label>City or location<input required name="location" className="mt-1 w-full rounded-md border p-2" /></label>{error && <p className="sm:col-span-2 text-danger" role="alert">{error}</p>}<button disabled={pending} className="button button-primary sm:col-span-2">{pending ? "Creating…" : "Create wedding"}</button></form></section></main>; }
+import { WeddingDetailsForm } from "./wedding-details-form";
+import { WeddingArch } from "./arch";
+import styles from "./wedding.module.css";
+
+export function OnboardingPage() {
+  return <main id="wedding-content" className={styles.onboarding}>
+    <section className={styles.formCard} aria-labelledby="setup-title">
+      <p className={styles.eyebrow}>Wedding setup</p><h1 id="setup-title">Let’s bring your wedding to life</h1>
+      <p className={styles.intro}>Fill in the essential details to establish your dedicated planning workspace.</p>
+      <WeddingDetailsForm/>
+    </section>
+    <aside className={styles.aside}>
+      <div className={styles.illustrationCard}><div className={styles.largeArch}><WeddingArch/></div><p className={styles.eyebrow}>Dedicated workspace</p><h2>A quiet, organized beginning</h2><p>Bring your names, your date, and the place you’ll celebrate together into one home for your wedding.</p><div className={styles.cardFoot}><span>Made for your celebration</span><span>Your first step</span></div></div>
+      <div className={styles.adminNote}><span aria-hidden="true">♧</span><div><h3>Your wedding, your beginning</h3><p>You’ll become the first Admin of this wedding when you create it.</p></div></div>
+    </aside>
+  </main>;
+}
