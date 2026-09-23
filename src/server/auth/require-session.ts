@@ -4,7 +4,7 @@ import { SESSION_COOKIE_NAME } from "@/constants/auth";
 import { unauthenticated } from "@/server/api/errors";
 import { hashSensitiveToken } from "./tokens";
 import { Session } from "@/modules/auth/models/session.model";
-import { User } from "@/modules/auth/models/user.model";
+import { User } from "@/modules/auth/user.model";
 import { WeddingMembership } from "@/modules/memberships/models/wedding-membership.model";
 import { connectToDatabase } from "@/server/db/mongoose";
 

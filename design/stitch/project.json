@@ -1,0 +1,244 @@
+{
+  "createTime": "2026-09-22T06:22:24.972688Z",
+  "designTheme": {
+    "bodyFont": "PLUS_JAKARTA_SANS",
+    "bodyFontFamily": "Plus Jakarta Sans",
+    "colorMode": "LIGHT",
+    "colorVariant": "FIDELITY",
+    "customColor": "#a65b46",
+    "designMd": "---\nname: Warm Editorial Nuance\ncolors:\n  surface: '#fff8f4'\n  surface-dim: '#dfd9d5'\n  surface-bright: '#fff8f4'\n  surface-container-lowest: '#ffffff'\n  surface-container-low: '#f9f2ef'\n  surface-container: '#f3ede9'\n  surface-container-high: '#ede7e3'\n  surface-container-highest: '#e7e1de'\n  on-surface: '#1d1b19'\n  on-surface-variant: '#54433f'\n  inverse-surface: '#32302e'\n  inverse-on-surface: '#f6f0ec'\n  outline: '#86736e'\n  outline-variant: '#d9c1bb'\n  surface-tint: '#914a37'\n  primary: '#884430'\n  on-primary: '#ffffff'\n  primary-container: '#a65b46'\n  on-primary-container: '#fff1ee'\n  inverse-primary: '#ffb5a0'\n  secondary: '#625e5a'\n  on-secondary: '#ffffff'\n  secondary-container: '#e6ded9'\n  on-secondary-container: '#66625e'\n  tertiary: '#595750'\n  on-tertiary: '#ffffff'\n  tertiary-container: '#726f68'\n  on-tertiary-container: '#f8f3ea'\n  error: '#ba1a1a'\n  on-error: '#ffffff'\n  error-container: '#ffdad6'\n  on-error-container: '#93000a'\n  primary-fixed: '#ffdbd1'\n  primary-fixed-dim: '#ffb5a0'\n  on-primary-fixed: '#3b0900'\n  on-primary-fixed-variant: '#743422'\n  secondary-fixed: '#e8e1dc'\n  secondary-fixed-dim: '#ccc5c0'\n  on-secondary-fixed: '#1e1b18'\n  on-secondary-fixed-variant: '#4a4642'\n  tertiary-fixed: '#e7e2d9'\n  tertiary-fixed-dim: '#cac6bd'\n  on-tertiary-fixed: '#1d1c16'\n  on-tertiary-fixed-variant: '#494740'\n  background: '#fff8f4'\n  on-background: '#1d1b19'\n  surface-variant: '#e7e1de'\ntypography:\n  display-lg:\n    fontFamily: Playfair Display\n    fontSize: 56px\n    fontWeight: '400'\n    lineHeight: 64px\n    letterSpacing: -0.02em\n  display-lg-mobile:\n    fontFamily: Playfair Display\n    fontSize: 36px\n    fontWeight: '400'\n    lineHeight: 44px\n    letterSpacing: -0.01em\n  headline-lg:\n    fontFamily: Playfair Display\n    fontSize: 40px\n    fontWeight: '400'\n    lineHeight: 48px\n    letterSpacing: -0.015em\n  headline-lg-mobile:\n    fontFamily: Playfair Display\n    fontSize: 28px\n    fontWeight: '400'\n    lineHeight: 36px\n    letterSpacing: -0.01em\n  headline-md:\n    fontFamily: Playfair Display\n    fontSize: 28px\n    fontWeight: '500'\n    lineHeight: 36px\n    letterSpacing: -0.01em\n  headline-sm:\n    fontFamily: Playfair Display\n    fontSize: 22px\n    fontWeight: '600'\n    lineHeight: 28px\n    letterSpacing: '0'\n  title-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 18px\n    fontWeight: '600'\n    lineHeight: 26px\n    letterSpacing: -0.01em\n  title-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 16px\n    fontWeight: '600'\n    lineHeight: 24px\n    letterSpacing: '0'\n  body-lg:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 16px\n    fontWeight: '400'\n    lineHeight: 26px\n    letterSpacing: '0'\n  body-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 14px\n    fontWeight: '400'\n    lineHeight: 22px\n    letterSpacing: '0'\n  body-sm:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 12px\n    fontWeight: '400'\n    lineHeight: 18px\n    letterSpacing: 0.01em\n  label-md:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 12px\n    fontWeight: '600'\n    lineHeight: 16px\n    letterSpacing: 0.06em\n  label-sm:\n    fontFamily: Plus Jakarta Sans\n    fontSize: 10px\n    fontWeight: '600'\n    lineHeight: 14px\n    letterSpacing: 0.08em\nrounded:\n  sm: 0.125rem\n  DEFAULT: 0.25rem\n  md: 0.375rem\n  lg: 0.5rem\n  xl: 0.75rem\n  full: 9999px\nspacing:\n  gutter: 1.5rem\n  gutter-mobile: 1rem\n  margin: 3rem\n  margin-mobile: 1.25rem\n  space-xs: 0.25rem\n  space-sm: 0.5rem\n  space-md: 1rem\n  space-lg: 1.5rem\n  space-xl: 2.5rem\n---\n\n## Brand & Style\n\nThis design system expresses modern product design married with quiet luxury and warm human storytelling, subtly contextualized for contemporary Indian weddings. It purposefully steps away from conventional bridal clich\u00e9s\u2014avoiding loud marigolds, ornate gold filigree, heavy magenta, and chaotic multi-event noise\u2014in favor of an architectural, editorial rhythm reminiscent of an art monograph or high-end archival publication.\n\nThe target audience includes design-conscious couples, high-end wedding planners, and multi-generational family coordinators who demand rigor, order, and visual poise across large-scale festivities. The UI must evoke composure, warmth, spatial generosity, and effortless control amidst complex planning workflows.\n\nThe visual style blends:\n- **Editorial Modernism:** Distinct typographic hierarchy, generous negative space, purposeful hairline dividers, and deliberate text columns.\n- **Warm Minimalist Tactility:** Rich, light-toned canvas layers (warm ivory, soft cream, and subtle warm beige) paired with deliberate deep charcoal and espresso accents rather than stark black and clinical white.\n- **SaaS Precision:** Crisp micro-interactions, systematic density controls for complex logistical views (run-of-show, guest tiers, vendor agreements), and uncompromised legibility.\n\n## Colors\n\nThe color system establishes a warm, tactile palette rooted in natural materials\u2014cotton rag paper, sun-dried clay, and hand-ground espresso.\n\n### Primary Palette & Roles\n- **Primary Accent (`#A65B46` - Soft Clay Rose / Terracotta):** Used strictly as a focused call-to-action color, active state indicator, and key event marker. It brings deliberate human warmth without shouting or leaning into loud bridal reds.\n- **Secondary (`#24211E` - Espresso Noir):** Applied for high-contrast contextual sections (such as editorial hero statements, evening run-of-show modes, or VIP seating matrices) and primary interactive elements when muted authority is required.\n- **Tertiary (`#ECE7DE` - Warm Beige Surface):** Acts as container fills, subtle hover tokens, and foundational table headers that distinguish groupings without relying on harsh lines.\n- **Neutral Foreground (`#1E1C1A` - Deep Charcoal):** The primary reading ink. Avoid `#000000` everywhere to preserve warmth.\n\n### Functional Roles & Canvas Logic\n- **Canvas Base:** `#FBF9F5` (Warm Ivory) as the root application background, paired with `#F5F2EB` (Soft Cream) for secondary panels and inner sections.\n- **Card Surfaces:** Pure `#FFFFFF` elevated solely by subtle borders (`#E6E1D8`) and ambient warm shadows.\n- **Secondary Ink:** `#6E6963` for subtitles, tabular metadata, and secondary labels; `#8C867F` for disabled or de-emphasized structural elements.\n- **Semantic Feedback:** Muted ochre, sage, and dusky rust tones mapped strictly to low-saturation scales, avoiding discordant synthetic primary greens and blues.\n\n## Typography\n\nTypography establishes an immediate dialogue between poetic editorial ceremony and operational efficiency.\n\n- **Headings (Playfair Display):** Conveys editorial elegance, refined romantic poise, and architectural order. Used in title casings for ceremony names, overview statistics, section titles, and key milestones. Kept at regular to medium weights (`400`-`500`) to let the character forms breathe.\n- **Body & UI (Plus Jakarta Sans):** Chosen for its geometric clarity balanced by subtly rounded humanist terminals. It ensures dense tabular schedules, RSVPs, dietary matrices, and budget ledgers remain exceptionally legible on both desktop and mobile viewports.\n- **Labels & Overlines:** Rendered in `Plus Jakarta Sans` with uppercase styling and expanded tracking (`0.06em` to `0.08em`) to mirror archival indexes and luxury stationery monograms.\n\n## Layout & Spacing\n\nThe layout philosophy follows a relaxed 12-column modular rhythm structured to prevent logistical overcrowding while supporting rich document layouts.\n\n- **Desktop (1200px+):** 12-column grid, 48px outer margins, and 24px column gutters. Complex workflows (like 3-day itinerary overviews or seating charts) employ an asymmetric 4/8 or 3/9 split, grouping operational filters on the left with expansive content cards on the right.\n- **Tablet (768px \u2013 1199px):** 8-column layout, 32px margins, 20px gutters. Sub-navigation collapses into inline segmented horizontal tabs.\n- **Mobile (< 768px):** 4-column layout, 20px margins, 16px gutters. Itinerary timelines transition from horizontal multi-column tracks to an anchored, vertical chronological stream.\n- **Spatial Rhythm:** Elements leverage a generous 8px base rhythm. High-level dashboard blocks are buffered by `space-xl` (40px) to maintain a serene, unhurried browsing pace.\n\n## Elevation & Depth\n\nDepth is treated with subtle restraint, prioritizing tonal layering and warm tactile borders over pronounced drop shadows.\n\n- **Tonal Layering:** The primary depth mechanic uses surface stacking: `#FBF9F5` (base canvas) \u2192 `#F5F2EB` (sub-sections / grouping bays) \u2192 `#FFFFFF` (interactive cards and modules).\n- **Hairline Framing:** Cards and elevated containers rely on a structural 1px border colored with `#E6E1D8`. This replaces the need for aggressive shadows and creates an editorial print quality.\n- **Ambient Shadow (Soft Float):** When floating modals, date pickers, or active drag-and-drop seating nodes require elevation, utilize an extra-diffused warm umber drop: `0px 12px 32px -4px rgba(36, 33, 30, 0.05), 0px 4px 12px -2px rgba(36, 33, 30, 0.03)`.\n- **Dark Contrast Inversion:** When rendering evening event timelines or premium feature highlights in `#24211E`, inner cards drop borders down to 10% opacity white (`rgba(255, 255, 255, 0.08)`) with zero shadows.\n\n## Shapes\n\nThe geometric signature uses soft, architectural tailoring (`roundedness: 1`). Surfaces feel crafted rather than bubbly or toy-like.\n\n- **Base Radius (0.25rem / 4px):** Applied to micro-components such as data table chips, status indicators, form inputs, and checkboxes.\n- **Large Radius (0.5rem / 8px):** Applied to cards, modal sheets, and standard action buttons.\n- **Extra-Large Radius (0.75rem / 12px):** Reserved for primary hero modules, media frames, and full-screen viewports.\n- **Strict Exceptions:** Interactive pill tags and avatars may use full rounding (`9999px`), while event sequence indicators retain crisp 4px corners to align with linear timeline spines.\n\n## Components\n\n### Buttons\n- **Primary:** `#A65B46` fill, `#FFFFFF` text, `0.5rem` radius, padding `12px 24px`. Subtle hover transition shifting to `#944F3C`.\n- **Secondary (Editorial Dark):** `#24211E` fill, `#FBF9F5` text. Used for primary milestones or printable run-of-show exports.\n- **Outline / Ghost:** 1px `#E6E1D8` border, transparent background, `#1E1C1A` text. Hover shifts background to `#ECE7DE`.\n\n### Input Fields & Controls\n- **Inputs & Selects:** `#FFFFFF` background, 1px `#E6E1D8` border, 8px radius, 12px 16px padding. Active focus state transitions border to `#A65B46` without harsh outer glow rings. Placeholder text set in `#8C867F`.\n- **Checkboxes & Radios:** 18px custom square/circular controls. Unchecked: `#FFFFFF` with 1.5px `#E6E1D8` border. Checked: `#A65B46` fill with an off-white checkmark.\n\n### Cards & Panels\n- **Standard Card:** `#FFFFFF` fill, 1px `#E6E1D8` border, 8px radius, `space-lg` internal padding. No resting shadow. Hover states subtly lift the card with the ambient warm shadow and a border shift to `#D9D3C7`.\n- **Ceremony / Milestone Card:** Split-panel layout with warm beige left boundary (`#ECE7DE`), an editorial serif title, and structured timestamp metadata.\n\n### Chips & Badges\n- **Status Badges (Confirmed, Pending, VIP):** Soft tinted backgrounds (`#F5F2EB`), 1px `#E6E1D8` border, uppercase `label-sm` typography with tracking. Positive confirmations adopt a desaturated sage tone; reminders use muted terracotta.\n\n### Domain-Specific Components\n- **Ceremony Timeline Spine:** A vertical 1px hairline in `#E6E1D8` linking multi-event schedules (e.g., Sangeet, Haldi, Vows, Reception). Active moments are marked with an 8px solid terracotta circular milestone node.\n- **Guest Tier Grouping:** Modular matrix grouping guests by multi-event access, food choices, and familial ties, styled using subtle horizontal zebra stripping (`#FBF9F5` to `#FFFFFF`) and minimal column dividers.",
+    "font": "PLAYFAIR_DISPLAY",
+    "headlineFont": "PLAYFAIR_DISPLAY",
+    "headlineFontFamily": "Playfair Display",
+    "labelFont": "PLUS_JAKARTA_SANS",
+    "labelFontFamily": "Plus Jakarta Sans",
+    "namedColors": {
+      "background": "#fff8f4",
+      "error": "#ba1a1a",
+      "error_container": "#ffdad6",
+      "inverse_on_surface": "#f6f0ec",
+      "inverse_primary": "#ffb5a0",
+      "inverse_surface": "#32302e",
+      "on_background": "#1d1b19",
+      "on_error": "#ffffff",
+      "on_error_container": "#93000a",
+      "on_primary": "#ffffff",
+      "on_primary_container": "#fff1ee",
+      "on_primary_fixed": "#3b0900",
+      "on_primary_fixed_variant": "#743422",
+      "on_secondary": "#ffffff",
+      "on_secondary_container": "#66625e",
+      "on_secondary_fixed": "#1e1b18",
+      "on_secondary_fixed_variant": "#4a4642",
+      "on_surface": "#1d1b19",
+      "on_surface_variant": "#54433f",
+      "on_tertiary": "#ffffff",
+      "on_tertiary_container": "#f8f3ea",
+      "on_tertiary_fixed": "#1d1c16",
+      "on_tertiary_fixed_variant": "#494740",
+      "outline": "#86736e",
+      "outline_variant": "#d9c1bb",
+      "primary": "#884430",
+      "primary_container": "#a65b46",
+      "primary_fixed": "#ffdbd1",
+      "primary_fixed_dim": "#ffb5a0",
+      "secondary": "#625e5a",
+      "secondary_container": "#e6ded9",
+      "secondary_fixed": "#e8e1dc",
+      "secondary_fixed_dim": "#ccc5c0",
+      "surface": "#fff8f4",
+      "surface_bright": "#fff8f4",
+      "surface_container": "#f3ede9",
+      "surface_container_high": "#ede7e3",
+      "surface_container_highest": "#e7e1de",
+      "surface_container_low": "#f9f2ef",
+      "surface_container_lowest": "#ffffff",
+      "surface_dim": "#dfd9d5",
+      "surface_tint": "#914a37",
+      "surface_variant": "#e7e1de",
+      "tertiary": "#595750",
+      "tertiary_container": "#726f68",
+      "tertiary_fixed": "#e7e2d9",
+      "tertiary_fixed_dim": "#cac6bd"
+    },
+    "overrideNeutralColor": "#1e1c1a",
+    "overridePrimaryColor": "#a65b46",
+    "overrideSecondaryColor": "#24211e",
+    "overrideTertiaryColor": "#ece7de",
+    "roundness": "ROUND_FOUR",
+    "spacing": {
+      "gutter": "1.5rem",
+      "gutter-mobile": "1rem",
+      "margin": "3rem",
+      "margin-mobile": "1.25rem",
+      "space-lg": "1.5rem",
+      "space-md": "1rem",
+      "space-sm": "0.5rem",
+      "space-xl": "2.5rem",
+      "space-xs": "0.25rem"
+    },
+    "spacingScale": 2,
+    "typography": {
+      "body-lg": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "16px",
+        "fontWeight": "400",
+        "letterSpacing": "0",
+        "lineHeight": "26px"
+      },
+      "body-md": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "14px",
+        "fontWeight": "400",
+        "letterSpacing": "0",
+        "lineHeight": "22px"
+      },
+      "body-sm": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "12px",
+        "fontWeight": "400",
+        "letterSpacing": "0.01em",
+        "lineHeight": "18px"
+      },
+      "display-lg": {
+        "fontFamily": "Playfair Display",
+        "fontSize": "56px",
+        "fontWeight": "400",
+        "letterSpacing": "-0.02em",
+        "lineHeight": "64px"
+      },
+      "display-lg-mobile": {
+        "fontFamily": "Playfair Display",
+        "fontSize": "36px",
+        "fontWeight": "400",
+        "letterSpacing": "-0.01em",
+        "lineHeight": "44px"
+      },
+      "headline-lg": {
+        "fontFamily": "Playfair Display",
+        "fontSize": "40px",
+        "fontWeight": "400",
+        "letterSpacing": "-0.015em",
+        "lineHeight": "48px"
+      },
+      "headline-lg-mobile": {
+        "fontFamily": "Playfair Display",
+        "fontSize": "28px",
+        "fontWeight": "400",
+        "letterSpacing": "-0.01em",
+        "lineHeight": "36px"
+      },
+      "headline-md": {
+        "fontFamily": "Playfair Display",
+        "fontSize": "28px",
+        "fontWeight": "500",
+        "letterSpacing": "-0.01em",
+        "lineHeight": "36px"
+      },
+      "headline-sm": {
+        "fontFamily": "Playfair Display",
+        "fontSize": "22px",
+        "fontWeight": "600",
+        "letterSpacing": "0",
+        "lineHeight": "28px"
+      },
+      "label-md": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "12px",
+        "fontWeight": "600",
+        "letterSpacing": "0.06em",
+        "lineHeight": "16px"
+      },
+      "label-sm": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "10px",
+        "fontWeight": "600",
+        "letterSpacing": "0.08em",
+        "lineHeight": "14px"
+      },
+      "title-lg": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "18px",
+        "fontWeight": "600",
+        "letterSpacing": "-0.01em",
+        "lineHeight": "26px"
+      },
+      "title-md": {
+        "fontFamily": "Plus Jakarta Sans",
+        "fontSize": "16px",
+        "fontWeight": "600",
+        "letterSpacing": "0",
+        "lineHeight": "24px"
+      }
+    }
+  },
+  "deviceType": "DESKTOP",
+  "metadata": {
+    "userRole": "OWNER"
+  },
+  "name": "projects/7051439649980667637",
+  "origin": "STITCH",
+  "projectType": "TEXT_TO_UI_PRO",
+  "screenInstances": [
+    {
+      "height": 970,
+      "id": "1c957428b0224ec8a3f559b36bc0ae2b",
+      "isResized": true,
+      "sourceScreen": "projects/7051439649980667637/screens/1c957428b0224ec8a3f559b36bc0ae2b",
+      "width": 1696,
+      "x": -1014,
+      "y": -5422
+    },
+    {
+      "height": 56,
+      "id": "3734bbb691fc4dc39dd9ba020dcfcd40",
+      "sourceScreen": "projects/7051439649980667637/screens/3734bbb691fc4dc39dd9ba020dcfcd40",
+      "width": 240,
+      "x": 576,
+      "y": 2420
+    },
+    {
+      "height": 286,
+      "id": "40863cb36b2a4f68b16f32e4a8e80878",
+      "sourceScreen": "projects/7051439649980667637/screens/40863cb36b2a4f68b16f32e4a8e80878",
+      "width": 512,
+      "x": 1600
+    },
+    {
+      "height": 287,
+      "id": "a6b578a3168649ba994e22a96a1c685b",
+      "sourceScreen": "projects/7051439649980667637/screens/a6b578a3168649ba994e22a96a1c685b",
+      "width": 512,
+      "y": 2420
+    },
+    {
+      "height": 540,
+      "id": "assets_6582d7b136524185938a826caccd62f2",
+      "sourceAsset": "assets/6582d7b136524185938a826caccd62f2",
+      "type": "DESIGN_SYSTEM_INSTANCE",
+      "width": 960
+    },
+    {
+      "height": 44,
+      "id": "b730f9b91b2442da832b9125c91b35e6",
+      "sourceScreen": "projects/7051439649980667637/screens/b730f9b91b2442da832b9125c91b35e6",
+      "width": 160,
+      "x": 1024
+    },
+    {
+      "height": 7934,
+      "id": "d321d43c6fcf4a0e8a8986328658caab",
+      "sourceScreen": "projects/7051439649980667637/screens/d321d43c6fcf4a0e8a8986328658caab",
+      "width": 1280,
+      "x": -2777,
+      "y": -5858
+    }
+  ],
+  "thumbnailScreenshot": {
+    "downloadUrl": "https://lh3.googleusercontent.com/aida/AEtjO1UiBFDDMEX74Jt5IMUStbxfZ6v9wf__gPxI2uoAu05wj1zvjnL5jG3XUec3UdZP5wL5CcrvTs960aP4ONaWq9QDXGSvYOhwVjFYWziCregot5YFgHHENgVBS2dmawn4PFCb5f8DtJIjsQIPOif4JoOymP8zQ9YMKx_9hTfgfXLwLjLdyMMCj1oOmrTTK-v02RQWrcA_jQhj1ksdyBSPbb3xC0e15J_jtdVJM3rd0gPmk6FsZanYH6fxC8Y",
+    "name": "projects/7051439649980667637/screens/b730f9b91b2442da832b9125c91b35e6/fileEntries/screenshot"
+  },
+  "title": "My Marriage Landing Page",
+  "updateTime": "2026-09-22T07:00:29.701084Z",
+  "visibility": "PRIVATE"
+}

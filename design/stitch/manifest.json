@@ -1,0 +1,77 @@
+{
+  "projectId": "projects/7051439649980667637",
+  "projectTitle": "My Marriage Landing Page",
+  "extractedAt": "2026-09-23T04:44:38.179Z",
+  "screens": [
+    {
+      "id": "b730f9b91b2442da832b9125c91b35e6",
+      "title": "My Marriage Brand Mark",
+      "name": "projects/7051439649980667637/screens/b730f9b91b2442da832b9125c91b35e6",
+      "width": "160",
+      "height": "64",
+      "deviceType": null,
+      "svgFile": "assets/my-marriage-brand-mark.svg",
+      "svgBytes": 477,
+      "screenshotFile": "screenshots/my-marriage-brand-mark.png",
+      "screenshotBytes": 6468
+    },
+    {
+      "id": "d321d43c6fcf4a0e8a8986328658caab",
+      "title": "My Marriage — Editorial Landing Page",
+      "name": "projects/7051439649980667637/screens/d321d43c6fcf4a0e8a8986328658caab",
+      "width": "2560",
+      "height": "16114",
+      "deviceType": "DESKTOP",
+      "htmlFile": "html/my-marriage-editorial-landing-page.html",
+      "htmlBytes": 56348,
+      "screenshotFile": "screenshots/my-marriage-editorial-landing-page.png",
+      "screenshotBytes": 14042
+    },
+    {
+      "id": "a6b578a3168649ba994e22a96a1c685b",
+      "title": "My Marriage MM Monogram Mark",
+      "name": "projects/7051439649980667637/screens/a6b578a3168649ba994e22a96a1c685b",
+      "width": "512",
+      "height": "512",
+      "deviceType": null,
+      "svgFile": "assets/my-marriage-mm-monogram-mark.svg",
+      "svgBytes": 322,
+      "screenshotFile": "screenshots/my-marriage-mm-monogram-mark.png",
+      "screenshotBytes": 5580
+    },
+    {
+      "id": "3734bbb691fc4dc39dd9ba020dcfcd40",
+      "title": "My Marriage Logo Full",
+      "name": "projects/7051439649980667637/screens/3734bbb691fc4dc39dd9ba020dcfcd40",
+      "width": "240",
+      "height": "48",
+      "deviceType": null,
+      "svgFile": "assets/my-marriage-logo-full.svg",
+      "svgBytes": 512,
+      "screenshotFile": "screenshots/my-marriage-logo-full.png",
+      "screenshotBytes": 9144
+    },
+    {
+      "id": "40863cb36b2a4f68b16f32e4a8e80878",
+      "title": "Quiet editorial candid photography of a sophisticated modern Indian wedding couple at dusk in a courtyard with minimalist stone architecture, wearing understated contemporary ivory and muted raw silk attire, captured naturally with soft cinematic lighting, 35mm film aesthetic, no cheesy posing, no heavy saturated colors, quiet luxury and authentic joy",
+      "name": "projects/7051439649980667637/screens/40863cb36b2a4f68b16f32e4a8e80878",
+      "width": "1376",
+      "height": "768",
+      "deviceType": null,
+      "screenshotFile": "screenshots/quiet-editorial-candid-photography-of-a-sophisticated-modern.png",
+      "screenshotBytes": 49044
+    },
+    {
+      "id": "1c957428b0224ec8a3f559b36bc0ae2b",
+      "title": "My Marriage — Login & Authentication Experience",
+      "name": "projects/7051439649980667637/screens/1c957428b0224ec8a3f559b36bc0ae2b",
+      "width": "2560",
+      "height": "2048",
+      "deviceType": "DESKTOP",
+      "htmlFile": "html/my-marriage-login-authentication-experience.html",
+      "htmlBytes": 21599,
+      "screenshotFile": "screenshots/my-marriage-login-authentication-experience.png",
+      "screenshotBytes": 33465
+    }
+  ]
+}
